@@ -75,6 +75,7 @@ export function ImageSlider() {
         </div>
 
       </div>
+      <div className="absolute inset-x-0 bottom-0 w-full h-[15%] bg-linear-to-t from-black/60 to-transparent" />
     </div>
   )
 }
