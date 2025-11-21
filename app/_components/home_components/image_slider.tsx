@@ -52,7 +52,7 @@ export function ImageSlider() {
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 text-center px-4">
 
         {/* Typography matched to your target image */}
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">
+        <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-xl drop-shadow-gray-900">
           AI-Powered Disaster <br />
           Management for Pakistan
         </h1>
