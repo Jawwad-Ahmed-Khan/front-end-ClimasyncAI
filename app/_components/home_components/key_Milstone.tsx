@@ -1,5 +1,6 @@
 import Image from "next/image";
-
+import { Text_Styles,DIV_Styles,Layout } from "@/app/_types/const_types";
+// Yhan pr me interface keymilestone use karon or API k through Data fetch karon ga
 const KeyMilestone = () => {
   const pitcures = [
     {
@@ -38,11 +39,11 @@ const KeyMilestone = () => {
   return (
     // 1. WRAPPER: Changed 'mt-5' to 'py-12 md:py-20'. 
     // This gives proper vertical breathing room on all devices.
-    <div className="w-full bg-white py-12 md:py-24 px-4">
+    <div className={DIV_Styles.Container + ' ' + DIV_Styles.Section_Padding + '' + DIV_Styles.Section_Bottom_Only}>
       
-      <div className="max-w-7xl mx-auto">
+      <div className={Layout.maxWidth}>
         {/* 2. HEADING: text-3xl for mobile, text-4xl/5xl for desktop */}
-        <h1 className="text-3xl md:text-5xl font-bold text-center text-gray-900 mb-12 md:mb-20">
+        <h1 className={Text_Styles.Heading_1}>
           Key Milestones
         </h1>
 
@@ -52,15 +53,8 @@ const KeyMilestone = () => {
             - lg:grid-cols-5: Laptops (All in one row)
             - gap-y-12: Vertical space between rows
         */}
-        <div className="
-          grid 
-          grid-cols-2 
-          md:grid-cols-3 
-          lg:grid-cols-5 
-          gap-x-6 
-          gap-y-12 
-          justify-items-center
-        ">
+        <div className=
+        {Layout.Grid}>
           {pitcures.map((pic, index) => (
             <div 
               className="flex flex-col items-center text-center group" 
@@ -83,10 +77,10 @@ const KeyMilestone = () => {
                   - Title: Smaller on mobile, bolder.
                   - Desc: Gray color for hierarchy.
               */}
-              <h2 className="text-2xl md:text-3xl font-extrabold text-blue-900 mb-2">
+              <h2 className={`${Text_Styles.Heading_2} text-blue-900 mb-2`}>
                 {pic.title}
               </h2>
-              <p className="text-sm md:text-base font-medium text-gray-600 max-w-[120px] md:max-w-none leading-tight">
+              <p className={Text_Styles.paragraph}>
                 {pic.description}
               </p>
             </div>
