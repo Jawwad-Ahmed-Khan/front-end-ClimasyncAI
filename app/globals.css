@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 .embla {
   overflow: hidden;
 }
@@ -9,5 +10,25 @@
 
 .embla__slide {
   position: relative;
-  flex: 0 0 100%; /* Adjust based on your needs */
+  flex: 0 0 100%;
+  /* Adjust based on your needs */
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.mask-image-gradient {
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
