@@ -1,164 +1,220 @@
-# Lead UI/UX Designer & Senior Frontend Engineer - Disaster Management AI Platform
+# Project Specification: Pakistan Disaster Response Dashboard (ClimaSync)
 
-**Role:** Lead UI/UX Designer & Senior Frontend Engineer  
-**Task:** Build a high-trust, professional "About Us" page for a Disaster Management AI platform.  
-**Tech Stack:** Next.js 14 (App Router), TypeScript, Tailwind CSS, Framer Motion (animations), Lucide React (icons).
+## 1\. Project Overview & About
 
----
+**Application Name:** ClimaSync / Pakistan Disaster Response Dashboard
+**Purpose:** A centralized, AI-driven command center for coordinating disaster relief efforts across Pakistan.
+**Core Functionality:**
+The platform aggregates real-time data on natural disasters (floods, earthquakes, etc.). It acts as a bridge between high-level situational awareness and ground-level NGO operations. Users can search specific locations to view impact metrics (damage, aid status) and track specific relief tasks assigned to various NGOs (Edhi, Saylani, Al-Khidmat, etc.).
 
-## 1. Design Philosophy & Theme (Light Mode Professional)
+**Target Audience:** Government officials, NGO coordinators, and Public Observers.
 
-The user previously had a dark-mode design that felt too "gaming-oriented." We need to pivot to a Clean, Humanitarian Tech aesthetic.
-
-### Background:
-- **Clean White** (`bg-white`) or very subtle off-white (`bg-slate-50`).
-
-### Typography:
-- **Headings:** Dark Slate (`text-slate-900`)
-- **Body:** Medium Slate (`text-slate-600`)
-- High readability is key.
-
-### Color Palette:
-- **Primary:** Deep Royal Blue (Trust/Stability) - `blue-600`
-- **Secondary:** Teal/Emerald (Recovery/Nature) - `emerald-500`
-- **Alert:** Soft Red (Urgency/Disaster) - `rose-500`
-
-### Visual Style:
-- Use **Subtle Shadows** (`shadow-sm`, `shadow-lg`) instead of neon glows.
-- Use **Rounded corners** (`rounded-2xl`) for a friendly, modern feel.
-
-### Future Proofing:
-- Ensure all background colors are applied via Tailwind classes so the user can easily swap `bg-white` to `bg-slate-950` later if they decide to revert.
+Here is a clean **Markdown overview** with a proper heading explaining the **purpose of the page**:
 
 ---
 
-## 2. Folder & File Structure
+# 📄 **Overview — Purpose of This Page**
 
-Create these modular components to keep `app/about/page.tsx` clean:
+This page is designed to allow users to quickly and easily access detailed information about any location affected by a disaster. The primary purpose of the page is to help users understand the **impact**, **damage**, **recovery status**, and **aid distribution** for a selected area, while also providing visibility into tasks assigned to various NGOs for relief and recovery.
 
----
-/_components
-/about_components
-├── hero_section.tsx (Title & Context)
-├── mission_vision.tsx (Core values)
-├── why_we.tsx (Renamed from "Why We Exist" - Stats grid)
-├── WorkflowPipeline.tsx (Renamed from "It Works" - The 6 steps)
-├── impact.tsx (The colored cards)
-├── partner.tsx (Logo slider)
-├── TeamGrid.tsx (Team members)
-└── CtaBanner.tsx (Final call to action)
----
+Users can search for a location (e.g., “Lahore”), and the page will display all relevant disaster-related data for that location. In addition, the page visually presents NGO-allocated tasks in the form of interactive cards, showing task progress and completion percentages. Each task can be opened individually to view full details using a dedicated slug-based route.
+
+The page also includes a button to view all **unallocated tasks**, as well as **pagination** for managing long lists. Overall, this page serves as a comprehensive, interactive hub for exploring disaster impact metrics and tracking NGO task progress.
 
 ---
 
-## 3. Component Specifications (Detailed)
+-----
 
-### A. `hero_section.tsx`
+## 2\. Technical Stack & Design System
 
-**Design:** Clean center-aligned or split layout.  
+  * **Framework:** Next.js (App Router)
+  * **Styling:** Tailwind CSS (Focus on Dark Mode, Glassmorphism, Neon Accents)
+  * **Language:** TypeScript
+  * **Animation:** Framer Motion (for modal transitions and layout shifts)
+  * **Icons:** Lucide-react
+
+### Design Aesthetic
+
+  * **Theme:** "Tactical Dark Mode." Deep slate backgrounds (`bg-slate-900`) with high-contrast neon accents.
+  * **Card Style:** "Bento Grid" layout. Cards use semi-transparent backgrounds with subtle borders (Glassmorphism).
+  * **Visual Logic:**
+      * **Red:** Critical/Unallocated/High Damage.
+      * **Yellow:** In Progress/Assigned.
+      * **Green:** Completed/Recovered/Safe.
+      * **Blue:** Informational/Neutral.
+
+-----
+
+## 3\. File Structure
+
+All page-specific components must be isolated for modularity.
+
+```
+src/
+└── app/
+    └── task/
+        ├── page.tsx               # Main Page Entry (Server Component)
+        └── _components/
+            └── task_component/    # Designated Component Folder
+                ├── DashboardHeader.tsx
+                ├── HeroMetricsSection.tsx
+                ├── FilterBar.tsx
+                ├── TaskGrid.tsx
+                ├── TaskCard.tsx
+                ├── TaskCardSkeleton.tsx
+                ├── TaskDetailModal.tsx
+                ├── PaginationControl.tsx
+                └── UnallocatedBanner.tsx
+```
+
+-----
+
+## 4\. Page Layout & Component Specifications
+
+### 4.1. Page Wrapper (`task/page.tsx`)
+
+**Type:** Server Component
+**Responsibility:** Fetches initial data based on URL search params (location, disaster type). Wraps the content in a responsive container.
+**Structure:**
+
+1.  `<DashboardHeader />`
+2.  `<FilterBar />`
+3.  `<HeroMetricsSection />`
+4.  `<UnallocatedBanner />` 
+5.  `<TaskGrid />`
+6.  `<PaginationControl />`
+
+-----
+
+### 4.2. Filter Bar (`FilterBar.tsx`)
+
+**Location:** Top of page (sticky).
+**Visuals:** Pill-shaped inputs/buttons on a blurred background.
+**Functionality:**
+
+  * **Location Search:** Input field. Searching "Lahore" triggers a re-fetch of metrics and tasks.
+  * **Dropdowns:** Disaster Type (Flood, Earthquake), Timeframe (Last 24h, Week, Month).
+  * **Auto-update:** Toggle switch (red when active) to enable polling for real-time data.
+
+### 4.3. Hero Metrics Section (`HeroMetricsSection.tsx`)
+
+**Visuals:**
+
+  * **Background:** A darkened, stylized satellite map image of the searched area (or general Pakistan map if no search).
+  * **Overlay:** Gradient fade-to-black at the bottom.
+  * **Typography:** Large, bold headings.
+
+**Sub-Components (Internal):**
+
+1.  **Context Header:** Displays "Pakistan Disaster Response Dashboard" and the dynamic text: "Real-time view of relief operations in [Location Name]."
+2.  **Metrics Ribbon:** A horizontal scrollable row of data points.
+      * *Affected Area:* (Icon: Users/MapPin) - Value + Unit.
+      * *Damage Assessment:* (Icon: AlertTriangle) - Financial or Structural count (Red accent).
+      * *Recovered:* (Icon: Activity) - Percentage (Green accent).
+      * *Aid Delivered:* (Icon: Truck) - Percentage (Teal accent).
+3.  **Map Toggle:** A button "View Heatmap" that toggles the background from a static image to an interactive map view (using a mapping library provider, represented conceptually here).
+
+### 4.4. Unallocated Tasks Redirect (`UnallocatedBanner.tsx`)
+
+**Visuals:** A distinct, high-urgency strip or floating button.
+**Design:**
+
+  * Background: `bg-red-500/20` (Red glass).
+  * Border: `border-red-500`.
+  * Text: "Warning: [X] Tasks are currently Unallocated."
+  * **Action:** Button labeled "View Unallocated" -\> Redirects to `/tasks/unallocated`.
+
+### 4.5. Task Grid (`TaskGrid.tsx`)
+
+**Type:** Client Component (for layout animations).
+**Layout:** Responsive CSS Grid.
+
+  * Mobile: 1 column.
+  * Tablet: 2 columns.
+  * Desktop: 3 or 4 columns.
+    **Behavior:**
+  * Uses `AnimatePresence` from Framer Motion.
+  * When filters change, grid items animate in/out rather than snapping.
+  * **Empty State:** If no tasks found, show a polite illustration.
+
+### 4.6. Task Card (`TaskCard.tsx`)
+
+**Visuals:** Dark card with soft glowing borders based on status.
+**Props:** `TaskData` object (NGO name, logo, task type, progress %, status, description).
+
+**UI Structure:**
+
+1.  **Header:**
+      * **Left:** NGO Logo (Circular) + NGO Name (e.g., Edhi, Al-Khidmat).
+      * **Right:** Status Badge (Pill shape).
+          * *Assigned:* Yellow text/bg.
+          * *Completed:* Green text/bg.
+          * *Unallocated:* Red text/bg (if appearing here).
+2.  **Body:**
+      * **Title:** Task Title (e.g., "Medical Aid", "Food Provision").
+      * **Description:** Truncated text (2 lines max). "Providing emergency ambulances..."
+3.  **Progress Section:**
+      * **Bar:** Slim progress line. Gradient fill from red to green based on %.
+      * **Label:** "[X]% Completed".
+4.  **Footer (Action Area):**
+      * **Icon Group:** Small muted icons for Home, Location, Attachment.
+      * **Primary Action:** Button.
+          * *If In Progress:* "View Details" or "Update".
+          * *If Completed:* "Audit".
+      * **Interactive Trigger:** Clicking the card body opens the `TaskDetailModal`.
+
+### 4.7. Task Detail Modal (`TaskDetailModal.tsx`)
+
+**Type:** Client Component (Overlay/Dialog).
+**Trigger:** Clicking a `TaskCard`.
+**Visuals:** Backdrop blur (`backdrop-blur-md`), centered modal with deep shadow. Matches the "Mobile Clinics" overlay in the provided wireframe.
+
 **Content:**
-- **H1:** "Reshaping Disaster Resilience with AI." (More professional than the original text).
-- **Subtext:** "An automated system reducing response delays and saving lives through predictive analytics and real-time verification."
 
-**Visual:** Since we don't have a 3D robot, use a clean, abstract tech pattern (like a dotted map grid) in light grey as the background texture.
+1.  **Header:** Expanded NGO info and Task Title.
+2.  **Tabs/Accordion:**
+      * *Contact:* Coordinator phone/email.
+      * *Timeline/Activity:* Vertical timeline of updates (e.g., "Resources requested vs provided").
+      * *Notes:* Field notes from the ground.
+      * *Attachments:* Images/PDFs of receipts or proof of work.
+3.  **Actions:**
+      * **Update Status:** Dropdown to change progress.
+      * **Reassign:** Button to change NGO (Admin only).
+      * **Close:** X button or click outside.
 
-### B. `mission_vision.tsx`
+### 4.8. Loading Skeletons (`TaskCardSkeleton.tsx`)
 
-**Layout:** Side-by-side "Bento Box" style cards.  
-**Design:** White cards with border `border-slate-200` and `shadow-sm`.
+**Purpose:** Displayed while data is fetching.
+**Visuals:** Pulse animation (`animate-pulse`) using `bg-slate-800`.
+**Structure:** Matches the geometry of `TaskCard` (Circle for logo, rectangles for text, line for progress bar) to prevent layout shifts (CLS).
 
-**Content (Refined):**
-- **Mission:** "To eliminate delays, minimize false alarms, and unify coordination using AI-driven verification."
-- **Vision:** "Sustainable, automated disaster resilience for Pakistan and the global community."
+### 4.9. Pagination (`PaginationControl.tsx`)
 
-### C. `why_we.tsx` (Formerly "Why We Exist")
+**Location:** Bottom of the grid.
+**Visuals:** Minimalist numbers with "Previous" and "Next" chevrons.
+**Behavior:**
 
-**Critique of original:** The timeline line was messy.
+  * Active page: Highlighted in primary theme color (e.g., Slate-700).
+  * Clicking scrolls the user back to the top of the Grid section smoothly.
 
-**New Design:** A 3-column Grid of large statistics.
+-----
 
-**Data Points:**
-- **224 Major Disasters** (1950–2024)
-- **$36B+ Economic Losses Incurred**
-- **2.5M+ People Displaced** (2022-2025 Analysis)
+## 5\. UX/UI & Visual Logic Enhancements
 
-**Style:** Large bold numbers in Primary Blue. Small descriptive text below.
+### Improvements over Wireframe
 
-### D. `work_flow.tsx` (Formerly "It Works")
+1.  **Visual Hierarchy:** The wireframe is a bit cluttered. We will increase padding inside cards and reduce font sizes for secondary text (timestamps, detailed descriptions) to let the Status and Progress pop.
+2.  **Map Integration:** The wireframe shows a static map background. We will implement a "glass" overlay effect so the text remains readable regardless of the map's complexity.
+3.  **Progress Visualization:** Instead of a simple slider, we will use a SVG path animation for the progress bar to make it feel "live."
+4.  **Interactive Filters:** The wireframe filters look static. We will add hover states (glow effect) to the city/disaster type chips.
 
-**Concept:** A horizontal scrolling or flex pipeline showing the data journey.  
-**Refined Steps:**
-- **Verification Agent** (Icon: `ShieldCheck`)
-- **Risk Analysis** (Icon: `Activity`)
-- **Protocol Definer** (Renamed from "Precaution Definer" - Icon: `FileText`)
-- **Distribution Engine** (Renamed from "Work Distributor" - Icon: `Network`)
-- **Task Allocation** (Renamed from "Task Allocator" - Icon: `ClipboardList`)
-- **Public Alert System** (Renamed from "Social Agent" - Icon: `Megaphone`)
+### Lazy Loading Strategy
 
-**Animation:** Use Framer Motion to animate an arrow or line moving through these steps.
+  * **Images:** All NGO logos and map backgrounds must use `next/image` with `placeholder="blur"`.
+  * **Components:** The `TaskDetailModal` should be lazy-loaded using `next/dynamic` so its code is only downloaded when a user actually clicks a card.
 
-### E. `impact.tsx`
+### Mobile Responsiveness
 
-**Design:** 4 Cards in a grid.
-
-**Style:** Light background with a colored top border corresponding to the stat type.
-
-**Cards:**
-- **Speed:** "70% Faster Verification" (Border: Red)
-- **Accuracy:** "80% Fewer False Alarms" (Border: Yellow/Orange)
-- **Coordination:** "Optimized NGO Workflows" (Border: Blue)
-- **Scale:** "Globally Scalable Model" (Border: Green)
-
-### F. `partner.tsx`
-
-**Constraint:** Images are located in `public/images/logos`.  
-**Implementation:** Use an "Infinite Marquee" effect.  
-**Placeholders:** Since we don't know the exact filenames, generate an array of dummy paths like `/images/logos/partner1.png`, `/images/logos/partner2.png`, etc., so the user just has to rename their files to match.
-
-### G. `TeamGrid.tsx`
-
-**Constraint:** No images yet.  
-**Implementation:** Create a clean "Skeleton" or placeholder design. Use a grey circle `bg-slate-200` with a user icon inside for the avatar.  
-**Hover Effect:** Slight zoom on the avatar.
-
-**Roles:**
-- **Omer (Team Lead)**
-- **Moe (AI Architect)**
-- **Sherry (Backend Lead)**
-- **David (Data Scientist)**
-
-### H. `CtaBanner.tsx`
-
-**Design:** Full width, `bg-slate-900` (Dark contrast footer) or Primary Blue.  
-**Text:** "Ready to modernize disaster response?"  
-**Buttons:**
-- "Register Organization" (Primary styling)
-- "Contact Support" (Secondary/Outline styling)
-
----
-
-## 4. Code Requirements
-
-### Strict Typing:
-- Define interfaces for `TeamMember`, `Stat`, `WorkflowStep`.
-
-### Responsiveness:
-- Must look perfect on Mobile (stack columns) and Desktop.
-
-### Animation:
-- Use Framer Motion for:
-  - Fade-in on scroll (`viewport={{ once: true }}`).
-  - Staggered entrance for grid items.
-
----
-
-## 5. Implementation Plan
-
-Please generate the code in this order:
-1. The **Data/Types file** (so we have structured content).
-2. The individual **Components** (Hero, Mission, Workflow, Team, etc.).
-3. The final **Page.tsx** assembly.
-
----
-
-### Start by creating the component code.
+  * **Filters:** On mobile, the filter bar should collapse into a "Filter" button that opens a drawer, saving screen real estate.
+  * **Grid:** Stacks vertically.
+  * **Modal:** On mobile, the Modal acts as a Bottom Sheet (sliding up from the bottom) rather than a centered modal, for better thumb reachability.
