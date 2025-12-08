@@ -16,15 +16,15 @@ export default function NavLink({ href, label, isActive }: NavLinkProps) {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className={`relative px-5 py-2.5 rounded-xl transition-all duration-300 overflow-hidden ${isActive
-                        ? "text-white"
-                        : "text-slate-400 hover:text-white"
+                    ? "text-white"
+                    : "text-slate-400 hover:text-white"
                     }`}
             >
                 {/* Active Background Gradient */}
                 {isActive && (
                     <motion.div
                         layoutId="activeNavBg"
-                        className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-cyan-500/20 rounded-xl"
+                        className="absolute inset-0 bg-linear-to-r from-cyan-500/20 via-blue-500/20 to-cyan-500/20 rounded-xl"
                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                     />
                 )}

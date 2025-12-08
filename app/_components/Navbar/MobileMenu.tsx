@@ -40,14 +40,14 @@ export default function MobileMenu({ navLinks, pathname, onClose }: MobileMenuPr
                 />
 
                 {/* Gradient Side Accent */}
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-cyan-500/50 via-blue-500/30 to-transparent" />
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-linear-to-b from-cyan-500/50 via-blue-500/30 to-transparent" />
 
                 {/* Content */}
                 <div className="relative h-full flex flex-col">
                     {/* Header */}
                     <div className="flex items-center justify-between p-6 border-b border-white/5">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-lg bg-linear-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
                                 <Zap className="w-4 h-4 text-white" />
                             </div>
                             <span className="text-lg font-semibold text-white">Menu</span>
@@ -76,8 +76,8 @@ export default function MobileMenu({ navLinks, pathname, onClose }: MobileMenuPr
                                     href={link.href}
                                     onClick={onClose}
                                     className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-300 group ${pathname === link.href
-                                            ? "bg-gradient-to-r from-cyan-500/15 to-blue-500/15 border border-cyan-500/20"
-                                            : "hover:bg-white/5"
+                                        ? "bg-linear-to-r from-cyan-500/15 to-blue-500/15 border border-cyan-500/20"
+                                        : "hover:bg-white/5"
                                         }`}
                                 >
                                     <span className={`font-medium text-base ${pathname === link.href ? "text-white" : "text-slate-300 group-hover:text-white"
@@ -120,7 +120,7 @@ export default function MobileMenu({ navLinks, pathname, onClose }: MobileMenuPr
                                 href="/register"
                                 onClick={onClose}
                                 className="flex items-center justify-center gap-3 w-full px-6 py-3.5 rounded-xl font-medium
-                                    bg-gradient-to-r from-cyan-500 to-blue-500 text-white
+                                    bg-linear-to-r from-cyan-500 to-blue-500 text-white
                                     hover:from-cyan-400 hover:to-blue-400
                                     shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40
                                     transition-all duration-300"

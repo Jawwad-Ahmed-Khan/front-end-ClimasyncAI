@@ -29,15 +29,15 @@ export default function ProfileDropdown() {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setIsOpen(!isOpen)}
                 className={`relative flex items-center gap-2 p-2 pr-3 rounded-xl border transition-all duration-300 group ${isOpen
-                        ? "bg-white/10 border-cyan-500/30"
-                        : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                    ? "bg-white/10 border-cyan-500/30"
+                    : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
                     }`}
                 aria-label="Profile menu"
             >
                 {/* Avatar Circle */}
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${isOpen
-                        ? "bg-gradient-to-br from-cyan-500 to-blue-500"
-                        : "bg-gradient-to-br from-slate-700 to-slate-800 group-hover:from-cyan-500/50 group-hover:to-blue-500/50"
+                    ? "bg-linear-to-br from-cyan-500 to-blue-500"
+                    : "bg-linear-to-br from-slate-700 to-slate-800 group-hover:from-cyan-500/50 group-hover:to-blue-500/50"
                     }`}>
                     <User className="w-4 h-4 text-white" strokeWidth={1.5} />
                 </div>
@@ -69,12 +69,12 @@ export default function ProfileDropdown() {
                             }}
                         >
                             {/* Gradient Top Accent */}
-                            <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
+                            <div className="h-px bg-linear-to-r from-transparent via-cyan-500/50 to-transparent" />
 
                             {/* Header */}
                             <div className="px-5 py-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center border border-cyan-500/20">
+                                    <div className="w-10 h-10 rounded-xl bg-linear-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center border border-cyan-500/20">
                                         <User className="w-5 h-5 text-cyan-400" />
                                     </div>
                                     <div>
@@ -107,12 +107,12 @@ export default function ProfileDropdown() {
                                     <motion.div
                                         whileHover={{ x: 4 }}
                                         className="flex items-center gap-3 px-4 py-3 rounded-xl
-                                            bg-gradient-to-r from-cyan-500/10 to-blue-500/10 
+                                            bg-linear-to-r from-cyan-500/10 to-blue-500/10 
                                             hover:from-cyan-500/20 hover:to-blue-500/20
                                             border border-cyan-500/20 hover:border-cyan-500/30
                                             text-white transition-all duration-200 group"
                                     >
-                                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
+                                        <div className="w-8 h-8 rounded-lg bg-linear-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
                                             <UserPlus className="w-4 h-4 text-cyan-400" />
                                         </div>
                                         <span className="font-medium text-sm">Create Account</span>
