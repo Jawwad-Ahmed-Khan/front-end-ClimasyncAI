@@ -74,6 +74,7 @@ export default function MapPage() {
             pitch: 0,
             bearing: 0,
             antialias: true,
+            projection: 'globe' as any, // Type cast if types are outdated
         });
 
         console.log('🗺️ Map instance created');
@@ -100,6 +101,15 @@ export default function MapPage() {
 
             // Configure map lighting for dramatic effect
             mapInstance.setConfigProperty('basemap', 'lightPreset', 'dusk');
+
+            // Add atmospheric glow (Fog)
+            mapInstance.setFog({
+                'color': 'rgb(12, 22, 43)', // Lower atmosphere
+                'high-color': 'rgb(12, 22, 43)', // Upper atmosphere
+                'horizon-blend': 0.1, // Atmosphere thickness (default 0.2 at low zooms)
+                'space-color': 'rgb(11, 11, 23)', // Background color
+                'star-intensity': 0.35 // Background star brightness (default 0.35 at low zooms)
+            });
 
             // Enable 3D terrain initially if terrain layer is active
             if (layerState.terrain) {
@@ -386,8 +396,8 @@ export default function MapPage() {
             {/* Map Container */}
             <div
                 ref={mapContainerRef}
-                className="absolute inset-0"
-                style={{ width: '100%', height: '100%' }}
+                className="absolute inset-0 top-16"
+                style={{ width: '100%', height: 'calc(100% - 64px)' }}
             />
 
             {/* Loading Overlay */}

@@ -102,50 +102,39 @@ export default function RainLayer({
                         'interpolate',
                         ['linear'],
                         ['get', 'rain'],
-                        0,
-                        0,
-                        50,
-                        1,
+                        0, 0,
+                        2, 0.5,
+                        10, 1,
                     ],
-                    // Increase the heatmap color weight weight by zoom level
+                    // Adjust intensity by zoom level
                     'heatmap-intensity': [
                         'interpolate',
                         ['linear'],
                         ['zoom'],
-                        0,
-                        1,
-                        9,
-                        3,
+                        0, 0.5,
+                        9, 2,
                     ],
-                    // Color ramp for heatmap - blue to violet gradient
+                    // Color ramp: Distinct steps for solid look
                     'heatmap-color': [
                         'interpolate',
                         ['linear'],
                         ['heatmap-density'],
-                        0,
-                        'rgba(33,102,172,0)',
-                        0.2,
-                        'rgb(103,169,207)',
-                        0.4,
-                        'rgb(209,229,240)',
-                        0.6,
-                        'rgb(253,219,199)',
-                        0.8,
-                        'rgb(239,138,98)',
-                        1,
-                        'rgb(178,24,43)',
+                        0, 'rgba(0,0,0,0)',
+                        0.1, 'rgba(103,169,207, 0.6)',
+                        0.3, 'rgba(209,229,240, 0.8)',
+                        0.5, 'rgba(253,219,199, 0.9)',
+                        0.7, 'rgba(239,138,98, 0.95)',
+                        0.9, 'rgba(178,24,43, 1)',
                     ],
-                    // Adjust the heatmap radius by zoom level
+                    // Increase radius for better blending at low zooms, but kept tight
                     'heatmap-radius': [
                         'interpolate',
                         ['linear'],
                         ['zoom'],
-                        0,
-                        2,
-                        9,
-                        20,
+                        0, 8,
+                        9, 25,
                     ],
-                    // Transition from heatmap to circle layer by zoom level
+                    // Higher opacity for visibility
                     'heatmap-opacity': [
                         'interpolate',
                         ['linear'],

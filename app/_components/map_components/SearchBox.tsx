@@ -8,6 +8,7 @@ import { useState, useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { Search, X, MapPin, Loader2, Navigation } from 'lucide-react';
 import { useDebounce } from '@/app/_hooks/useDisasterData';
+import { fetchLocationWeather } from '@/app/_api/map_api/fetchData';
 
 interface SearchBoxProps {
     map: mapboxgl.Map | null;
@@ -29,6 +30,7 @@ export default function SearchBox({ map, accessToken }: SearchBoxProps) {
     const debouncedQuery = useDebounce(query, 300);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const markerRef = useRef<mapboxgl.Marker | null>(null);
+    const popupRef = useRef<mapboxgl.Popup | null>(null);
 
     // Click outside to close
     useEffect(() => {
@@ -71,8 +73,12 @@ export default function SearchBox({ map, accessToken }: SearchBoxProps) {
         searchLocation();
     }, [debouncedQuery, accessToken]);
 
-    const handleSelect = (result: SearchResult) => {
+    const handleSelect = async (result: SearchResult) => { // Made async
         if (!map) return;
+
+        // Clear previous marker and popup
+        if (markerRef.current) markerRef.current.remove();
+        if (popupRef.current) popupRef.current.remove();
 
         // Fly to location
         map.flyTo({
@@ -82,8 +88,6 @@ export default function SearchBox({ map, accessToken }: SearchBoxProps) {
         });
 
         // Add marker
-        if (markerRef.current) markerRef.current.remove();
-
         const el = document.createElement('div');
         el.className = 'animate-bounce-custom';
         el.innerHTML = `
@@ -105,6 +109,72 @@ export default function SearchBox({ map, accessToken }: SearchBoxProps) {
             .setLngLat(result.center)
             .addTo(map);
 
+        // 2. Create Popup instance and attach it to the Marker
+        const popup = new mapboxgl.Popup({
+            offset: 35, // Adjust offset to be above the marker
+            closeButton: false,
+            closeOnClick: false,
+            className: 'custom-mapbox-popup' // Custom class for styling
+        })
+            .setLngLat(result.center)
+            .setHTML(`
+                <div class="p-3 bg-slate-900/90 backdrop-blur-md rounded-xl border border-white/20 text-white shadow-xl font-sans min-w-[180px]">
+                    <div class="flex items-center space-x-2">
+                        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-cyan-500"></div>
+                        <span class="text-xs font-semibold text-slate-300">Loading weather...</span>
+                    </div>
+                </div>
+            `) // b. Set initial "Loading..." HTML
+            .addTo(map);
+
+        markerRef.current.setPopup(popup);
+        popup.addTo(map); // Ensure popup is added to map
+        popupRef.current = popup; // Store popup reference
+
+        // c. Call fetchLocationWeather and d. Update the popup content
+        try {
+            const [lng, lat] = result.center;
+            const weather = await fetchLocationWeather(lat, lng);
+
+            if (weather) {
+                const { temperature, windSpeed, apparentTemperature, weatherCode } = weather;
+                popup.setHTML(`
+                    <div class="min-w-[200px] p-3 bg-slate-900/90 backdrop-blur-md rounded-xl border border-white/20 text-white shadow-xl font-sans">
+                        <h4 class="text-sm font-bold text-cyan-200 mb-2 border-b border-white/10 pb-1">${result.text}</h4>
+                        
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="flex flex-col">
+                                <span class="text-slate-400">Temp</span>
+                                <span class="text-lg font-bold text-white">${temperature}°C</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-slate-400">Feels Like</span>
+                                <span class="font-semibold text-white">${apparentTemperature}°C</span>
+                            </div>
+                            <div class="flex flex-col col-span-2">
+                                <span class="text-slate-400">Wind</span>
+                                <span class="font-semibold text-white">${windSpeed} km/h</span>
+                            </div>
+                            <!-- Add more weather details if needed, e.g., weatherCode -->
+                        </div>
+                    </div>
+                `); // 3. Styled popup content
+            } else {
+                popup.setHTML(`
+                    <div class="p-3 bg-slate-900/90 backdrop-blur-md rounded-xl border border-white/20 text-white shadow-xl font-sans">
+                        <p class="text-xs text-red-400">Weather data unavailable.</p>
+                    </div>
+                `);
+            }
+        } catch (e) {
+            console.error("Failed to fetch weather:", e);
+            popup.setHTML(`
+                <div class="p-3 bg-slate-900/90 backdrop-blur-md rounded-xl border border-white/20 text-white shadow-xl font-sans">
+                    <p class="text-xs text-red-400">Failed to load weather.</p>
+                </div>
+            `);
+        }
+
         setQuery(result.place_name);
         setIsOpen(false);
     };
@@ -113,10 +183,11 @@ export default function SearchBox({ map, accessToken }: SearchBoxProps) {
         setQuery('');
         setResults([]);
         if (markerRef.current) markerRef.current.remove();
+        if (popupRef.current) popupRef.current.remove(); // Also remove popup
     };
 
     return (
-        <div ref={wrapperRef} className="fixed top-4 left-4 z-20 w-full max-w-md animate-fade-in-up">
+        <div ref={wrapperRef} className="fixed top-24 left-4 z-50 w-full max-w-md animate-fade-in-up">
             <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     {isLoading ? (
