@@ -9,12 +9,12 @@ import JoinUs from "./_components/home_components/join_us";
 export default function Home() {
   return (
     <div>
-      <Image_slider/>
-      <Key_Milstone/>
-      <Workflow/>
-      <WhyThisProject/>
-      <TestimonialsLogos/>
-      <JoinUs/>
+      <Image_slider />
+      <Key_Milstone />
+      <Workflow />
+      <WhyThisProject />
+      <TestimonialsLogos />
+      <JoinUs />
     </div>
   );
 }

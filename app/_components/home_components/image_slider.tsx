@@ -4,6 +4,7 @@ import React from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
 import Image from 'next/image'
+import Link from 'next/link'
 
 export function ImageSlider() {
   const [emblaRef] = useEmblaCarousel(
@@ -21,9 +22,7 @@ export function ImageSlider() {
     console.log("Register NGO button clicked");
   }
 
-  const Handle_View_Live_Map = () => {
-    console.log("View Live Map button clicked");
-  }
+
   return (
     // 1. MAIN CONTAINER: Acts as the "Frame" (relative)
     <div className="relative w-full h-[85vh] overflow-hidden">
@@ -63,12 +62,12 @@ export function ImageSlider() {
 
         {/* Buttons Section */}
         <div className="flex gap-4">
-          <button onClick={Handle_View_Live_Map} className="bg-blue-600 hover:bg-blue-700 hover:scale-110 text-white font-semibold py-3 px-8 rounded-full transition duration-300">
+          <Link href="/map" className="bg-blue-600 hover:bg-blue-700 hover:scale-110 text-white font-semibold py-3 px-8 rounded-full transition duration-300 cursor-pointer">
             View Live Map
-          </button>
+          </Link>
           <button
             onClick={Handle_Register_NGo}
-            className=" bg-white text-blue-900 font-semibold py-3 px-8 rounded-full transition duration-300 hover:bg-gray-100 hover:scale-110"
+            className=" bg-white text-blue-900 font-semibold py-3 px-8 rounded-full transition duration-300 hover:bg-gray-100 hover:scale-110 cursor-pointer"
           >
             Register NGO
           </button>

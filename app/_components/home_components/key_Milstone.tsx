@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Text_Styles,DIV_Styles,Layout } from "@/app/_types/const_types";
+import { Text_Styles, DIV_Styles, Layout } from "@/app/_types/const_types";
 // Yhan pr me interface keymilestone use karon or API k through Data fetch karon ga
 const KeyMilestone = () => {
   const pitcures = [
@@ -40,7 +40,7 @@ const KeyMilestone = () => {
     // 1. WRAPPER: Changed 'mt-5' to 'py-12 md:py-20'. 
     // This gives proper vertical breathing room on all devices.
     <div className={DIV_Styles.Container + ' ' + DIV_Styles.Section_Padding + '' + DIV_Styles.Section_Bottom_Only}>
-      
+
       <div className={Layout.maxWidth}>
         {/* 2. HEADING: text-3xl for mobile, text-4xl/5xl for desktop */}
         <h1 className={Text_Styles.Heading_1}>
@@ -54,10 +54,10 @@ const KeyMilestone = () => {
             - gap-y-12: Vertical space between rows
         */}
         <div className=
-        {Layout.Grid}>
+          {Layout.Grid}>
           {pitcures.map((pic, index) => (
-            <div 
-              className="flex flex-col items-center text-center group" 
+            <div
+              className="flex flex-col items-center text-center group"
               key={index}
             >
               {/* 4. IMAGE CONTAINER:
@@ -65,9 +65,9 @@ const KeyMilestone = () => {
                   - transform transition: Adds a subtle pop when hovering over the icon.
               */}
               <div className="relative w-20 h-20 md:w-24 md:h-24 mb-6 transition-transform duration-300 group-hover:scale-110">
-                <Image 
-                  src={pic.src} 
-                  alt={pic.alt} 
+                <Image
+                  src={pic.src}
+                  alt={pic.alt}
                   fill
                   className="object-contain"
                 />
