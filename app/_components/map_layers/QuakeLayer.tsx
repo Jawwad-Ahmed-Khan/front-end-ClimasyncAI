@@ -160,7 +160,8 @@ export default function QuakeLayer({
 
         // Add markers for each earthquake
         earthquakeData.features.forEach((quake) => {
-            const { mag, place, time } = quake.properties;
+            const { mag: rawMag, place, time } = quake.properties;
+            const mag = rawMag ?? 0; // Default to 0 if magnitude is null/undefined
             const depth = quake.geometry.coordinates[2];
             const severity = getEarthquakeSeverity(mag);
             const isRecent = Date.now() - time < 24 * 60 * 60 * 1000;
