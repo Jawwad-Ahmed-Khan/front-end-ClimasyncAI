@@ -26,6 +26,7 @@ import type {
   User,
   VerifyOtpData,
   AuthError,
+  ResetPasswordData,
 } from "./authTypes";
 import {
   clearStoredAuth,
@@ -36,8 +37,11 @@ import {
   storeTokens,
   storeUser,
   verifyOtpAPI,
+  resendOtpAPI,
   forgotPasswordAPI,
   resetPasswordAPI,
+  getMeAPI,
+  logoutAPI,
 } from "./authService";
 import { AUTH_ROUTES } from "./authConstants";
 
@@ -66,18 +70,60 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isAuthenticated = !!user && !!tokens;
 
   // -----------------------------------------------------------------------
-  // Hydrate auth state from localStorage on mount
+  // Hydrate auth state from localStorage on mount & listen to force logouts
   // -----------------------------------------------------------------------
   useEffect(() => {
-    const storedTokens = getStoredTokens();
-    const storedUser = getStoredUser();
+    let isMounted = true;
+    
+    // Force logout triggered by apiClient if refresh token dies
+    const handleGlobalLogout = () => {
+      if (isMounted) {
+        clearStoredAuth();
+        setUser(null);
+        setTokens(null);
+        router.push(AUTH_ROUTES.LOGIN);
+      }
+    };
 
-    if (storedTokens && storedUser) {
-      setTokens(storedTokens);
-      setUser(storedUser);
+    if (typeof window !== "undefined") {
+      window.addEventListener("climasync:auth_logout", handleGlobalLogout);
     }
-    setIsLoading(false);
-  }, []);
+
+    const hydrate = async () => {
+      const storedTokens = getStoredTokens();
+      if (storedTokens) {
+        setTokens(storedTokens);
+        try {
+          // Always fetch freshest user data
+          const freshUser = await getMeAPI();
+          if (isMounted) {
+            setUser(freshUser);
+            storeUser(freshUser);
+          }
+        } catch {
+          // Token might be fully invalid and failed to refresh
+          if (isMounted) {
+            clearStoredAuth();
+            setTokens(null);
+            setUser(null);
+          }
+        }
+      }
+      
+      if (isMounted) {
+        setIsLoading(false);
+      }
+    };
+
+    hydrate();
+
+    return () => {
+      isMounted = false;
+      if (typeof window !== "undefined") {
+        window.removeEventListener("climasync:auth_logout", handleGlobalLogout);
+      }
+    };
+  }, [router]);
 
   // -----------------------------------------------------------------------
   // Login
@@ -224,12 +270,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // -----------------------------------------------------------------------
   // Logout
   // -----------------------------------------------------------------------
-  const logout = useCallback(() => {
-    clearStoredAuth();
-    setUser(null);
-    setTokens(null);
-    setError(null);
-    router.push(AUTH_ROUTES.HOME);
+  const logout = useCallback(async () => {
+    try {
+      // Only call via backend if we have tokens attempting validity
+      if (getStoredTokens()) {
+        await logoutAPI();
+      }
+    } catch {
+      // Ignore API errors, force local logout regardless
+    } finally {
+      clearStoredAuth();
+      setUser(null);
+      setTokens(null);
+      setError(null);
+      router.push(AUTH_ROUTES.HOME);
+    }
   }, [router]);
 
   // -----------------------------------------------------------------------
