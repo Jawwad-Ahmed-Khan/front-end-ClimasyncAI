@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -16,11 +16,13 @@ import { StatCard, TaskCard, NotificationItem, MiniMap } from "./_components";
 import {
     generateMockNGOProfile,
     generateMockStats,
-    generateMockTasks,
     generateMockNotifications,
     generateMockActiveDisasters,
 } from "./_lib/mockData";
-import { acceptTask, rejectTask, startTask, completeTask, markNotificationRead } from "./_lib/actions";
+import { getTasks, updateTask } from "@/app/_lib/tasks/taskService";
+import type { TaskResponse } from "@/app/_lib/tasks/taskTypes";
+import { markNotificationRead } from "./_lib/actions";
+import type { Task, TaskStatus } from "@/app/dashboard/_lib/types";
 
 // ============================================
 // HOME PAGE (Dashboard Landing)
@@ -32,9 +34,36 @@ export default function DashboardHome() {
     // Mock data - will be replaced with API calls
     const ngoProfile = generateMockNGOProfile();
     const stats = generateMockStats();
-    const [tasks, setTasks] = useState(generateMockTasks(20));
+    const [tasks, setTasks] = useState<Task[]>([]);
     const [notifications, setNotifications] = useState(generateMockNotifications(10));
     const disasters = generateMockActiveDisasters();
+
+    useEffect(() => {
+        const loadDashboardData = async () => {
+            try {
+                const liveTasks = await getTasks();
+                setTasks(liveTasks.map(t => ({
+                    id: t.task_id,
+                    label: t.title,
+                    description: t.description,
+                    taskType: 'MEDICAL', // mapping required_role could be done later
+                    disasterType: 'EARTHQUAKE',
+                    requiredQuantity: 1,
+                    priority: t.priority,
+                    targetLocation: { lat: t.latitude, lng: t.longitude },
+                    targetLocationName: 'Mapped Location',
+                    status: (t.status === 'UNALLOCATED' ? 'PENDING_ACCEPTANCE' : t.status) as TaskStatus,
+                    assignedAt: new Date(t.created_at),
+                    eventId: t.event_id,
+                    eventTitle: t.title,
+                    progress: t.progress_percentage
+                })));
+            } catch (e) {
+                console.error(e);
+            }
+        };
+        loadDashboardData();
+    }, []);
 
     // Get recent items
     const recentTasks = tasks.slice(0, 3);
@@ -42,26 +71,26 @@ export default function DashboardHome() {
 
     // Task action handlers
     const handleAcceptTask = async (taskId: string) => {
-        await acceptTask(taskId);
+        await updateTask(taskId, { status: 'ASSIGNED' });
         setTasks((prev) =>
             prev.map((t) => (t.id === taskId ? { ...t, status: "ASSIGNED" as const } : t))
         );
     };
 
     const handleRejectTask = async (taskId: string) => {
-        await rejectTask(taskId);
+        await updateTask(taskId, { status: 'UNALLOCATED' });
         setTasks((prev) => prev.filter((t) => t.id !== taskId));
     };
 
     const handleStartTask = async (taskId: string) => {
-        await startTask(taskId);
+        await updateTask(taskId, { status: 'IN_PROGRESS' });
         setTasks((prev) =>
             prev.map((t) => (t.id === taskId ? { ...t, status: "IN_PROGRESS" as const, progress: 0 } : t))
         );
     };
 
     const handleCompleteTask = async (taskId: string) => {
-        await completeTask(taskId, "Task completed successfully");
+        await updateTask(taskId, { status: 'COMPLETED', completion_notes: "Task completed successfully" });
         setTasks((prev) =>
             prev.map((t) => (t.id === taskId ? { ...t, status: "COMPLETED" as const, completedAt: new Date() } : t))
         );
