@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
     User,
@@ -14,9 +14,9 @@ import {
     Edit3,
     BadgeCheck,
 } from "lucide-react";
-import { generateMockNGOProfile } from "../_lib/mockData";
 import { updateProfile, changePassword } from "../_lib/actions";
 import { NGOProfile } from "../_lib/types";
+import { useAuth } from "@/app/_lib/auth/useAuth";
 
 // ============================================
 // PROFILE PAGE
@@ -25,21 +25,53 @@ import { NGOProfile } from "../_lib/types";
 // Used as: /dashboard/profile
 
 export default function ProfilePage() {
-    const [profile, setProfile] = useState<NGOProfile>(generateMockNGOProfile());
+    const { user } = useAuth();
+    const [profile, setProfile] = useState<NGOProfile | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
     // Form states
     const [formData, setFormData] = useState({
-        orgName: profile.orgName,
-        headOfOperations: profile.headOfOperations,
-        email: profile.email,
-        phone: profile.phone,
-        baseCity: profile.baseCity,
-        baseDistrict: profile.baseDistrict,
-        baseProvince: profile.baseProvince,
-        serviceRadiusKm: profile.serviceRadiusKm,
+        orgName: "",
+        headOfOperations: "",
+        email: "",
+        phone: "",
+        baseCity: "",
+        baseDistrict: "",
+        baseProvince: "",
+        serviceRadiusKm: 0,
     });
+
+    useEffect(() => {
+        if (user) {
+            const p = {
+                id: user.user_id,
+                orgName: user.org_name || '',
+                registrationNumber: 'N/A',
+                headOfOperations: 'N/A',
+                email: user.email,
+                phone: user.phone_number || '',
+                baseCity: 'N/A',
+                baseDistrict: 'N/A',
+                baseProvince: 'N/A',
+                baseLocation: { lat: 24.8607, lng: 67.0011 },
+                serviceRadiusKm: 150,
+                isVerified: user.verification_status === 'verified',
+                createdAt: new Date(user.created_at || Date.now())
+            };
+            setProfile(p);
+            setFormData({
+                orgName: p.orgName,
+                headOfOperations: p.headOfOperations,
+                email: p.email,
+                phone: p.phone,
+                baseCity: p.baseCity,
+                baseDistrict: p.baseDistrict,
+                baseProvince: p.baseProvince,
+                serviceRadiusKm: p.serviceRadiusKm,
+            });
+        }
+    }, [user]);
 
     // Password change states
     const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -59,6 +91,8 @@ export default function ProfilePage() {
         systemUpdates: false,
     });
 
+    if (!profile) return <div className="p-8 text-center text-slate-500">Loading profile...</div>;
+
     const handleInputChange = (field: string, value: string | number) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
@@ -67,7 +101,7 @@ export default function ProfilePage() {
         setIsSaving(true);
         const result = await updateProfile(formData);
         if (result.success) {
-            setProfile((prev) => ({ ...prev, ...formData }));
+            setProfile((prev) => prev ? { ...prev, ...formData } : null);
             setIsEditing(false);
         }
         setIsSaving(false);
