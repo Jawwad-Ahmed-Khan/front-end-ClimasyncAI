@@ -11,6 +11,7 @@ import type {
     RainData,
     WeatherGridData,
 } from '@/app/_types/api';
+import { getActiveDisasters } from '@/app/_lib/disasters/disasterService';
 
 // ============================================================================
 // Constants
@@ -96,45 +97,55 @@ function setCachedData<T>(key: string, data: T): void {
 // ============================================================================
 
 /**
- * Fetch earthquake data from USGS (globally - all earthquakes from past day)
+ * Fetch disaster data from Backend API and convert to GeoJSON
  */
 export async function fetchEarthquakes(): Promise<Earthquake[]> {
     try {
-        // Check cache
         const cachedData = getCachedData<Earthquake[]>('earthquakes');
         if (cachedData) {
-            console.log('📦 Using cached earthquake data');
+            console.log('📦 Using cached disasters data');
             return cachedData;
         }
 
-        console.log('🌍 Fetching global earthquake data from USGS...');
+        console.log('🌍 Fetching active disasters from ClimaSync Backend...');
 
-        // Fetch from USGS
-        const response = await axios.get<EarthquakeCollection>(USGS_ENDPOINT, {
-            timeout: 10000,
-            headers: {
-                'Accept': 'application/json',
-            },
+        const disasters = await getActiveDisasters(100, 0);
+
+        console.log(`✅ Fetched ${disasters.length} active disasters from Backend`);
+
+        const allEarthquakes: Earthquake[] = disasters.map(d => {
+            let mag = 3.0; // LOW mock
+            if (d.severity === 'MODERATE') mag = 4.5;
+            if (d.severity === 'HIGH') mag = 6.5;
+            if (d.severity === 'CRITICAL') mag = 8.5;
+
+            return {
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    // Note: Depth defaulted to 10
+                    coordinates: [d.longitude, d.latitude, 10]
+                },
+                properties: {
+                    mag,
+                    place: d.title,
+                    time: new Date(d.start_time).getTime(),
+                    updated: new Date(d.start_time).getTime(),
+                    title: d.title,
+                    tz: null, url: '', detail: '', felt: null, cdi: null, mmi: null, alert: null, status: d.status,
+                    tsunami: 0, sig: 0, net: '', code: '', ids: '', sources: '', types: '', nst: null, dmin: null, rms: null, gap: null, magType: ''
+                },
+                id: d.event_id
+            };
         });
 
-        console.log(`✅ Fetched ${response.data.features.length} earthquakes from USGS`);
-
-        // Return ALL earthquakes (global coverage)
-        const allEarthquakes = response.data.features;
-
-        // Sort by magnitude (descending)
         allEarthquakes.sort((a, b) => b.properties.mag - a.properties.mag);
-
-        // Cache the result
         setCachedData('earthquakes', allEarthquakes);
 
         return allEarthquakes;
     } catch (error) {
-        console.error('❌ Error fetching earthquake data:', error);
-        if (axios.isAxiosError(error)) {
-            throw new Error(`Failed to fetch earthquake data: ${error.message}`);
-        }
-        throw new Error('An unexpected error occurred while fetching earthquake data');
+        console.error('❌ Error fetching disaster data:', error);
+        throw new Error('An unexpected error occurred while fetching disaster data');
     }
 }
 
