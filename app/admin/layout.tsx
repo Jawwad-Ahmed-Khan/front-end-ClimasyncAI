@@ -4,9 +4,8 @@ import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import AdminSidebar from "./_components/AdminSidebar";
 import AdminHeader from "./_components/AdminHeader";
-import { generateMockAdminProfile } from "./_lib/adminMockData";
-import { AdminProfile } from "./_lib/adminTypes";
 import { ProtectedRoute } from "@/app/_lib/auth/authGuard";
+import { useAuth } from "@/app/_lib/auth/useAuth";
 
 // ============================================
 // ADMIN DASHBOARD LAYOUT
@@ -14,17 +13,7 @@ import { ProtectedRoute } from "@/app/_lib/auth/authGuard";
 // Shared layout for all Admin Dashboard pages
 // Features: Dark theme, collapsible sidebar, fixed header, responsive design
 
-// Static default values to prevent hydration mismatch
-const defaultAdminProfile: AdminProfile = {
-    id: 'admin-001',
-    name: 'Bilal Ahmed',
-    email: 'bilal@climasync.ai',
-    role: 'SUPER_ADMIN',
-    phone: '+92 300 9876543',
-    department: 'Operations Command',
-    lastActiveAt: new Date(),
-    createdAt: new Date('2024-01-15'),
-};
+// Uses AuthContext for user profile data
 
 export default function AdminLayout({
     children,
@@ -35,17 +24,26 @@ export default function AdminLayout({
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
-    // Use static values for SSR, dynamic values after mount
-    const [adminProfile, setAdminProfile] = useState<AdminProfile>(defaultAdminProfile);
+    const { user } = useAuth();
     const [unreadCount, setUnreadCount] = useState(0);
 
     // Initialize dynamic data only on client side to prevent hydration mismatch
     useEffect(() => {
         setIsMounted(true);
-        const profile = generateMockAdminProfile();
-        setAdminProfile(profile);
-        setUnreadCount(5); // Mock unread notifications
+        setUnreadCount(5); // Mock unread notifications for now
     }, []);
+
+    // Format auth User to match what AdminHeader expects
+    const adminProfile = user ? {
+        id: user.user_id,
+        name: user.org_name || 'Admin',
+        email: user.email,
+        role: user.role,
+        phone: 'N/A',
+        department: 'Administration',
+        lastActiveAt: new Date(),
+        createdAt: new Date(Date.now()),
+    } : null;
 
     return (
         <ProtectedRoute requiredRoles={["admin", "super_admin"]}>
@@ -106,12 +104,14 @@ export default function AdminLayout({
             </AnimatePresence>
 
             {/* Header */}
-            <AdminHeader
-                adminProfile={adminProfile}
-                unreadNotifications={unreadCount}
-                onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                isSidebarCollapsed={isSidebarCollapsed}
-            />
+            {adminProfile && (
+                <AdminHeader
+                    adminProfile={adminProfile as any}
+                    unreadNotifications={unreadCount}
+                    onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    isSidebarCollapsed={isSidebarCollapsed}
+                />
+            )}
 
             {/* Main Content */}
             <main className="relative z-10 pt-36 min-h-screen transition-all duration-300 lg:ml-0">
