@@ -65,12 +65,9 @@ export function ImageSlider() {
           <Link href="/map" className="bg-blue-600 hover:bg-blue-700 hover:scale-110 text-white font-semibold py-3 px-8 rounded-full transition duration-300 cursor-pointer">
             View Live Map
           </Link>
-          <button
-            onClick={Handle_Register_NGo}
-            className=" bg-white text-blue-900 font-semibold py-3 px-8 rounded-full transition duration-300 hover:bg-gray-100 hover:scale-110 cursor-pointer"
-          >
+          <Link href="/register" className=" bg-white text-blue-900 font-semibold py-3 px-8 rounded-full transition duration-300 hover:bg-gray-100 hover:scale-110 cursor-pointer">
             Register NGO
-          </button>
+          </Link>
         </div>
 
       </div>

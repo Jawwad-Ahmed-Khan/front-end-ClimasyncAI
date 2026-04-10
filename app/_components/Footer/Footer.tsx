@@ -40,6 +40,8 @@ const footerLinks = {
             { label: "Contact Us", href: "/contact" },
             { label: "Report Issue", href: "/report" },
             { label: "FAQs", href: "/faqs" },
+            { label: "Login", href: "/login" },
+            { label: "Create Account", href: "/register" },
         ],
     },
 };

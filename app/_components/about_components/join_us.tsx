@@ -1,19 +1,20 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { AboutStyles } from '@/app/_types/about_types';
 import { ArrowRight, Mail } from 'lucide-react';
 
 export default function JoinUs() {
+    const router = useRouter();
+
     const handleRegisterClick = () => {
-        console.log('Register Organization clicked');
-        // TODO: Navigate to registration page
+        router.push('/register');
     };
 
     const handleContactClick = () => {
-        console.log('Contact Support clicked');
-        // TODO: Navigate to contact page
+        router.push('/contact');
     };
 
     return (

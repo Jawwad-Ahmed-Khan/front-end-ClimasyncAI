@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { Navbar } from "./_components/Navbar";
-import { Footer } from "./_components/Footer";
+import { AuthProvider } from "./_lib/auth/authContext";
+import LayoutShell from "./_components/LayoutShell";
 
 import "./globals.css";
 
@@ -17,14 +17,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-
-        <Navbar />
-        <main className="pt-20 min-h-screen">
-          {children}
-        </main>
-        <Footer />
+        <AuthProvider>
+          <LayoutShell>{children}</LayoutShell>
+        </AuthProvider>
       </body>
     </html>
   );
 }
+
+
 

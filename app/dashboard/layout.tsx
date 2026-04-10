@@ -6,6 +6,7 @@ import Sidebar from "./_components/Sidebar";
 import DashboardHeader from "./_components/DashboardHeader";
 import { generateMockNGOProfile, generateMockNotifications } from "./_lib/mockData";
 import { NGOProfile, Notification } from "./_lib/types";
+import { ProtectedRoute } from "@/app/_lib/auth/authGuard";
 
 // ============================================
 // DASHBOARD LAYOUT
@@ -54,6 +55,7 @@ export default function DashboardLayout({
     }, []);
 
     return (
+        <ProtectedRoute>
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
             {/* Sidebar - Desktop */}
             <div className="hidden lg:block">
@@ -121,5 +123,6 @@ export default function DashboardLayout({
                 </div>
             </main>
         </div>
+        </ProtectedRoute>
     );
 }

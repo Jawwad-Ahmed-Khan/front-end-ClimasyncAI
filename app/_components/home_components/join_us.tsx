@@ -16,7 +16,7 @@ const JoinUs = () => {
                     </h1>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-x-8 w-full sm:w-auto">
-                    <button className="bg-blue-600 w-full sm:w-[200px] h-[50px] rounded-xl text-white font-semibold hover:bg-blue-700 transition-colors cursor-pointer">Register NGO</button>
+                    <Link href="/register" className="bg-blue-600 w-full sm:w-[200px] h-[50px] rounded-xl text-white font-semibold hover:bg-blue-700 transition-colors cursor-pointer flex items-center justify-center">Register NGO</Link>
                     <Link href="/about" className="bg-gray-100 w-full sm:w-[200px] h-[50px] rounded-xl text-blue-600 font-semibold hover:bg-white transition-colors cursor-pointer flex items-center justify-center">Learn More</Link>
                 </div>
             </div>

@@ -6,6 +6,7 @@ import AdminSidebar from "./_components/AdminSidebar";
 import AdminHeader from "./_components/AdminHeader";
 import { generateMockAdminProfile } from "./_lib/adminMockData";
 import { AdminProfile } from "./_lib/adminTypes";
+import { ProtectedRoute } from "@/app/_lib/auth/authGuard";
 
 // ============================================
 // ADMIN DASHBOARD LAYOUT
@@ -47,6 +48,7 @@ export default function AdminLayout({
     }, []);
 
     return (
+        <ProtectedRoute requiredRoles={["admin", "super_admin"]}>
         <div className="min-h-screen bg-slate-950">
             {/* Background Pattern */}
             <div className="fixed inset-0 z-0">
@@ -127,5 +129,6 @@ export default function AdminLayout({
                 </div>
             </main>
         </div>
+        </ProtectedRoute>
     );
 }
