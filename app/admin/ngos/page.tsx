@@ -20,7 +20,9 @@ import {
     AlertTriangle,
 } from "lucide-react";
 import { generateMockNGOsWithPerformance, formatTimeAgo } from "../_lib/adminMockData";
+import { getAdminNgos, verifyAdminNgo } from "@/app/_lib/admin/adminService";
 import type { NGOWithPerformance, VerificationStatus } from "../_lib/adminTypes";
+import type { NgoProfileSnapshot, NgoStatus } from "@/app/_lib/admin/adminTypes";
 
 // ============================================
 // NGOs PAGE
@@ -43,10 +45,67 @@ export default function NGOsPage() {
     const [sortBy, setSortBy] = useState<'tasksCompleted' | 'rating' | 'responseRate'>('tasksCompleted');
     const [isLoading, setIsLoading] = useState(true);
 
+    const loadNgos = async () => {
+        setIsLoading(true);
+        try {
+            const rawNgos = await getAdminNgos();
+            // Map the backend profiles to the UI performance signature temporarily keeping mocked performance fields
+            const mapped: NGOWithPerformance[] = rawNgos.map(n => ({
+                id: n.ngo_id,
+                orgName: n.org_name,
+                registrationNumber: n.registration_number || "PENDING",
+                headOfOperations: "N/A",
+                phone: "N/A",
+                email: n.org_email,
+                verificationStatus: n.verification_status.toUpperCase() as VerificationStatus,
+                rating: n.rating,
+                baseCity: "Rawalpindi",
+                baseDistrict: "Rawalpindi",
+                baseProvince: "Punjab",
+                baseLocation: { lat: 33.6844, lng: 73.0479 },
+                serviceRadiusKm: 50,
+                specializations: [],
+                resources: {
+                    ambulances: 0,
+                    rescueBoats: 0,
+                    trucks: 0,
+                    personnel: 0
+                },
+                tasksCompleted: 0,
+                tasksInProgress: 0,
+                tasksPending: 0,
+                responseRate: 100,
+                avgResponseTime: 0,
+                monthlyTrend: 0,
+                isOnline: false,
+                lastActiveAt: new Date(),
+                createdAt: new Date()
+            }));
+            setNGOs(mapped);
+        } catch (error) {
+            console.error("Failed to fetch admin NGOs", error);
+            // Fallback to mock on error for uncompleted API sections
+            setNGOs(generateMockNGOsWithPerformance(15));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
-        setNGOs(generateMockNGOsWithPerformance(15));
-        setIsLoading(false);
+        loadNgos();
     }, []);
+
+    const handleVerify = async (ngoId: string, status: NgoStatus) => {
+        try {
+            await verifyAdminNgo(ngoId, { status });
+            // Optimistic update
+            setNGOs(prev => prev.map(n => 
+                n.id === ngoId ? { ...n, verificationStatus: status.toUpperCase() as VerificationStatus } : n
+            ));
+        } catch (error) {
+            console.error("Verification failed", error);
+        }
+    };
 
     useEffect(() => {
         let filtered = ngos;
@@ -162,7 +221,7 @@ export default function NGOsPage() {
             {/* NGO Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {filteredNGOs.map((ngo, index) => (
-                    <NGOCard key={ngo.id} ngo={ngo} index={index} />
+                    <NGOCard key={ngo.id} ngo={ngo} index={index} handleVerify={handleVerify} />
                 ))}
             </div>
 
@@ -204,7 +263,7 @@ function StatMini({ label, value, icon: Icon, color }: {
 }
 
 // NGO Card Component
-function NGOCard({ ngo, index }: { ngo: NGOWithPerformance; index: number }) {
+function NGOCard({ ngo, index, handleVerify }: { ngo: NGOWithPerformance; index: number; handleVerify: (id: string, s: NgoStatus) => void; }) {
     const statusColors: Record<VerificationStatus, string> = {
         VERIFIED: 'text-emerald-400 bg-emerald-500/20',
         PENDING: 'text-amber-400 bg-amber-500/20',
@@ -298,14 +357,18 @@ function NGOCard({ ngo, index }: { ngo: NGOWithPerformance; index: number }) {
                     Message
                 </button>
                 {ngo.verificationStatus === 'PENDING' && (
-                    <button className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg
+                    <button 
+                        onClick={() => handleVerify(ngo.id, 'verified')}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg
                                       bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 text-xs">
                         <CheckCircle className="w-3.5 h-3.5" />
                         Verify
                     </button>
                 )}
                 {ngo.verificationStatus === 'VERIFIED' && (
-                    <button className="flex items-center justify-center p-2 rounded-lg
+                    <button 
+                        onClick={() => handleVerify(ngo.id, 'suspended')}
+                        className="flex items-center justify-center p-2 rounded-lg
                                       text-red-400 hover:bg-red-500/10">
                         <XCircle className="w-4 h-4" />
                     </button>

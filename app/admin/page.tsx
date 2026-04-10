@@ -19,12 +19,12 @@ import AlertCard from "./_components/AlertCard";
 import StatCard from "./_components/StatCard";
 import LiveMap from "./_components/LiveMap";
 import {
-    generateMockAlerts,
-    generateMockAdminStats,
-    generateMockDisasters,
     generateMockNGOsWithPerformance,
 } from "./_lib/adminMockData";
-import type { Alert, AdminStats, DisasterEvent, NGOWithPerformance } from "./_lib/adminTypes";
+import { getAdminGlobalReport } from "@/app/_lib/admin/adminService";
+import { getLiveAlerts, getActiveDisasters } from "@/app/_lib/disasters/disasterService";
+import type { AdminReportResponse } from "@/app/_lib/admin/adminTypes";
+import type { Alert, DisasterEvent, NGOWithPerformance, AlertSource, AlertStatus, RiskLevel } from "./_lib/adminTypes";
 
 // ============================================
 // COMMAND CENTER PAGE (Admin Home)
@@ -34,7 +34,7 @@ import type { Alert, AdminStats, DisasterEvent, NGOWithPerformance } from "./_li
 
 export default function CommandCenterPage() {
     const [alerts, setAlerts] = useState<Alert[]>([]);
-    const [stats, setStats] = useState<AdminStats | null>(null);
+    const [stats, setStats] = useState<AdminReportResponse | null>(null);
     const [disasters, setDisasters] = useState<DisasterEvent[]>([]);
     const [onlineNGOs, setOnlineNGOs] = useState<NGOWithPerformance[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -42,10 +42,62 @@ export default function CommandCenterPage() {
 
     // Load mock data
     useEffect(() => {
-        const loadData = () => {
-            setAlerts(generateMockAlerts(8));
-            setStats(generateMockAdminStats());
-            setDisasters(generateMockDisasters(5));
+        const loadData = async () => {
+            try {
+                const report = await getAdminGlobalReport();
+                setStats(report);
+            } catch (error) {
+                console.error("Failed to load global report", error);
+                // Keep UI from breaking if backend lacks data
+                setStats({
+                    total_users: 0, total_ngos: 0, pending_ngos: 0,
+                    total_alerts: 0, active_disasters: 0,
+                    system_health: "ok", generated_at: new Date().toISOString()
+                } as AdminReportResponse);
+            }
+
+            try {
+                const liveAlerts = await getLiveAlerts();
+                setAlerts(liveAlerts.map(a => ({
+                    id: a.alert_id,
+                    type: a.severity === 'CRITICAL' ? 'EARTHQUAKE' : 'FLOOD',
+                    title: 'Disaster Alert', // AlertData lacks title, using generic or derived fallback
+                    description: a.description,
+                    severity: 8, // numeric 0-10
+                    source: a.source as AlertSource,
+                    status: (a.status === 'NEW' ? 'NEW' : 'VERIFIED') as AlertStatus,
+                    location: { lat: a.latitude, lng: a.longitude },
+                    locationName: 'Pakistan',
+                    province: 'Punjab',
+                    confidence: 90,
+                    detectedAt: new Date(a.timestamp)
+                } as Alert)));
+            } catch (e) { console.error(e); }
+
+            try {
+                const liveDisasters = await getActiveDisasters();
+                setDisasters(liveDisasters.map(d => ({
+                    id: d.event_id,
+                    alertId: d.event_id, // assuming same for now
+                    title: d.title,
+                    description: d.title,
+                    type: d.severity === 'CRITICAL' ? 'EARTHQUAKE' : 'FLOOD',
+                    status: (d.status === 'ACTIVE' ? 'ACTIVE' : 'RESOLVED') as AlertStatus,
+                    location: { lat: d.latitude, lng: d.longitude },
+                    locationName: 'Pakistan',
+                    province: 'Punjab',
+                    severityScore: d.severity === 'CRITICAL' ? 9 : 7,
+                    riskLevel: (d.severity === 'CRITICAL' ? 'CRITICAL' : 'HIGH') as RiskLevel,
+                    affectedPopulation: 0,
+                    precautions: [],
+                    totalTasks: 0,
+                    completedTasks: 0,
+                    inProgressTasks: 0,
+                    unallocatedTasks: 0,
+                    detectedAt: new Date(d.start_time)
+                } as DisasterEvent)));
+            } catch (e) { console.error(e); }
+
             const allNGOs = generateMockNGOsWithPerformance(15);
             setOnlineNGOs(allNGOs.filter(ngo => ngo.isOnline));
             setIsLoading(false);
@@ -61,13 +113,18 @@ export default function CommandCenterPage() {
     };
 
     // Refresh data
-    const handleRefresh = () => {
+    const handleRefresh = async () => {
         setIsLoading(true);
+        try {
+            const report = await getAdminGlobalReport();
+            setStats(report);
+        } catch (error) {
+            console.error(error);
+        }
         setTimeout(() => {
-            setAlerts(generateMockAlerts(8));
-            setStats(generateMockAdminStats());
             setLastRefresh(new Date());
             setIsLoading(false);
+            window.location.reload(); // Simple refresh for now
         }, 500);
     };
 
@@ -113,34 +170,34 @@ export default function CommandCenterPage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard
                     title="Active Disasters"
-                    value={stats.activeDisasters}
-                    subtitle="Across Pakistan"
+                    value={stats.active_disasters}
+                    subtitle="Currently tracked"
                     icon={AlertTriangle}
                     color="red"
                     index={0}
                 />
                 <StatCard
-                    title="Pending Tasks"
-                    value={stats.pendingTasks}
-                    subtitle={`${stats.unallocatedTasks} unallocated`}
+                    title="Total Alerts"
+                    value={stats.total_alerts}
+                    subtitle="Platform ingestion"
                     icon={ClipboardList}
                     trend={{ value: 12, isPositive: false }}
                     color="amber"
                     index={1}
                 />
                 <StatCard
-                    title="Completed (Week)"
-                    value={stats.completedThisWeek}
-                    subtitle="Tasks finished"
-                    icon={CheckCircle}
+                    title="Platform Users"
+                    value={stats.total_users}
+                    subtitle="Registered globally"
+                    icon={Users}
                     trend={{ value: 18, isPositive: true }}
                     color="emerald"
                     index={2}
                 />
                 <StatCard
-                    title="NGOs Online"
-                    value={stats.onlineNGOs}
-                    subtitle={`${stats.totalVolunteers} volunteers`}
+                    title="Total NGOs"
+                    value={stats.total_ngos}
+                    subtitle={`${stats.pending_ngos} pending verification`}
                     icon={Building2}
                     color="blue"
                     index={3}
@@ -269,9 +326,9 @@ export default function CommandCenterPage() {
                     index={0}
                 />
                 <QuickActionCard
-                    title="Allocate Tasks"
-                    count={stats.unallocatedTasks}
-                    href="/admin/tasks"
+                    title="Verify NGOs"
+                    count={stats.pending_ngos}
+                    href="/admin/ngos"
                     color="amber"
                     index={1}
                 />
