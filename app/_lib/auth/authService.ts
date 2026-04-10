@@ -6,9 +6,9 @@
  * Components never call APIs directly — they go through AuthContext.
  */
 
-import axios, { AxiosError, type AxiosInstance } from "axios";
+import { AxiosError } from "axios";
+import { apiClient } from "../apiClient";
 import {
-  API_BASE_URL,
   AUTH_ENDPOINTS,
   AUTH_ERRORS,
   STORAGE_KEYS,
@@ -28,29 +28,6 @@ import type {
   ForgotPasswordData,
   ResetPasswordData,
 } from "./authTypes";
-
-// ---------------------------------------------------------------------------
-// Axios Instance
-// ---------------------------------------------------------------------------
-
-const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  timeout: 15000,
-});
-
-// Request interceptor — attach access token if available
-apiClient.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-  }
-  return config;
-});
 
 // ---------------------------------------------------------------------------
 // Error Parser
@@ -241,11 +218,40 @@ export async function resetPasswordAPI(data: ResetPasswordData): Promise<Message
 }
 
 // ---------------------------------------------------------------------------
-// Future API Functions (Placeholders)
+// ---------------------------------------------------------------------------
+// Protected API Functions
 // ---------------------------------------------------------------------------
 
-// TODO: Implement when backend adds these endpoints
-// export async function refreshTokenAPI(refreshToken: string): Promise<LoginResponse> { ... }
-// export async function logoutAPI(): Promise<void> { ... }
-// export async function getMeAPI(): Promise<User> { ... }
+export async function logoutAPI(): Promise<MessageResponse> {
+  try {
+    const refreshToken = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN) : null;
+    const response = await apiClient.post<MessageResponse>(
+      AUTH_ENDPOINTS.LOGOUT,
+      { refresh_token: refreshToken }
+    );
+    return response.data;
+  } catch (error) {
+    throw parseApiError(error);
+  }
+}
+
+export async function logoutAllAPI(): Promise<MessageResponse> {
+  try {
+    const response = await apiClient.post<MessageResponse>("/auth/logout-all");
+    return response.data;
+  } catch (error) {
+    throw parseApiError(error);
+  }
+}
+
+export async function getMeAPI(): Promise<User> {
+  try {
+    const response = await apiClient.get<User>(AUTH_ENDPOINTS.ME);
+    return response.data;
+  } catch (error) {
+    throw parseApiError(error);
+  }
+}
+
+// TODO: Implement when backend adds OAuth endpoints
 // export async function socialLoginRedirectAPI(provider: SocialProvider): Promise<string> { ... }
