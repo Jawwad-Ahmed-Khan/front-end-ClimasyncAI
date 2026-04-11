@@ -276,3 +276,31 @@ export function formatStatusLabel(status: TaskStatus): string {
     };
     return labels[status];
 }
+
+/**
+ * toFrontendStatus
+ * Converts backend lowercase status to frontend UPPER_CASE enum format
+ */
+export function toFrontendStatus(backendStatus: string | null | undefined): TaskStatus {
+    if (!backendStatus) return 'PENDING_ACCEPTANCE';
+    
+    // Normalize string to uppercase
+    const upper = backendStatus.toUpperCase().trim();
+    
+    // Check known matches
+    if (upper === 'PENDING' || upper === 'PENDING_ACCEPTANCE' || upper === 'PENDING ACCEPTANCE') {
+        return 'PENDING_ACCEPTANCE';
+    }
+    if (upper === 'IN_PROGRESS' || upper === 'IN PROGRESS') {
+        return 'IN_PROGRESS';
+    }
+    if (upper === 'ASSIGNED') {
+        return 'ASSIGNED';
+    }
+    if (upper === 'COMPLETED') {
+        return 'COMPLETED';
+    }
+    
+    // Fallback default
+    return 'PENDING_ACCEPTANCE';
+}

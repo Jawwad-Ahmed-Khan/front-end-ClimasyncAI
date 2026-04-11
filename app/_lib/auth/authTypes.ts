@@ -21,6 +21,8 @@ export interface User {
   is_active: boolean;
   email_verified: boolean;
   verification_status: VerificationStatus;
+  phone_number?: string;
+  created_at?: string;
 }
 
 // ---------------------------------------------------------------------------

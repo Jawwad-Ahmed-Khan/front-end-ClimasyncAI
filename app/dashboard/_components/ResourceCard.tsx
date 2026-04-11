@@ -55,7 +55,7 @@ const categoryColors = {
 
 export default function ResourceCard({ icon, label, value, category, onUpdate }: ResourceCardProps) {
     const [isEditing, setIsEditing] = useState(false);
-    const [editValue, setEditValue] = useState(value.toString());
+    const [editValue, setEditValue] = useState((value ?? 0).toString());
     const Icon = iconMap[icon];
     const colors = categoryColors[category];
 
@@ -64,13 +64,13 @@ export default function ResourceCard({ icon, label, value, category, onUpdate }:
         if (!isNaN(newValue) && newValue >= 0) {
             onUpdate?.(newValue);
         } else {
-            setEditValue(value.toString());
+            setEditValue((value ?? 0).toString());
         }
         setIsEditing(false);
     };
 
     const handleCancel = () => {
-        setEditValue(value.toString());
+        setEditValue((value ?? 0).toString());
         setIsEditing(false);
     };
 
@@ -130,7 +130,7 @@ export default function ResourceCard({ icon, label, value, category, onUpdate }:
                     ) : (
                         <>
                             <span className="text-2xl font-bold text-slate-900 dark:text-white">
-                                {value}
+                                {value ?? 0}
                             </span>
                             <motion.button
                                 whileHover={{ scale: 1.1 }}

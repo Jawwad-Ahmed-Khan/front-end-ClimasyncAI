@@ -9,7 +9,8 @@ import {
     ChevronRight,
 } from "lucide-react";
 import { TaskCard } from "../_components";
-import { generateMockTasks } from "../_lib/mockData";
+import { useEffect } from "react";
+import { getTasks } from "@/app/_lib/tasks/taskService";
 import { filterTasks } from "../_lib/utils";
 import { Task, TaskStatus, TaskPriority, DisasterType } from "../_lib/types";
 import { acceptTask, rejectTask, startTask, completeTask } from "../_lib/actions";
@@ -49,12 +50,44 @@ const TASKS_PER_PAGE = 8;
 
 export default function TasksPage() {
     // State
-    const [allTasks, setAllTasks] = useState<Task[]>(generateMockTasks(35));
+    const [allTasks, setAllTasks] = useState<Task[]>([]);
     const [activeTab, setActiveTab] = useState<TaskStatus | "ALL">("ALL");
     const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "">("");
     const [disasterFilter, setDisasterFilter] = useState<DisasterType | "">("");
     const [currentPage, setCurrentPage] = useState(1);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    useEffect(() => {
+        let isMounted = true;
+        const fetchTasks = async () => {
+            try {
+                const liveTasks = await getTasks();
+                if (isMounted) {
+                    setAllTasks(liveTasks.map(t => ({
+                        id: t.task_id,
+                        label: t.task_label,
+                        description: t.description || '',
+                        taskType: (t.task_type?.toUpperCase() || 'MEDICAL') as Task['taskType'],
+                        disasterType: 'FLOOD' as Task['disasterType'],
+                        requiredQuantity: t.required_quantity || 1,
+                        priority: (t.priority?.toUpperCase() || 'MEDIUM') as Task['priority'],
+                        targetLocation: { lat: 0, lng: 0 },
+                        targetLocationName: t.target_location_name || '',
+                        status: (t.status?.toUpperCase()?.replace(/ /g, '_') || 'ASSIGNED') as TaskStatus,
+                        assignedAt: t.assigned_at ? new Date(t.assigned_at) : new Date(t.created_at),
+                        completedAt: t.completed_at ? new Date(t.completed_at) : undefined,
+                        eventId: t.event_id || undefined,
+                        eventTitle: t.task_label,
+                        progress: t.progress || undefined,
+                    })));
+                }
+            } catch (e) {
+                console.error("Failed to load tasks:", e);
+            }
+        };
+        fetchTasks();
+        return () => { isMounted = false; };
+    }, []);
 
     // Filter tasks
     const filteredTasks = useMemo(() => {

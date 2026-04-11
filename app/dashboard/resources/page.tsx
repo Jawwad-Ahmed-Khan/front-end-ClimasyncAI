@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
     Package,
@@ -10,9 +10,8 @@ import {
     Save,
 } from "lucide-react";
 import { ResourceCard } from "../_components";
-import { generateMockResources } from "../_lib/mockData";
-import { updateResources } from "../_lib/actions";
 import { NGOResources } from "../_lib/types";
+import { getMyResources, updateResourceCapacity } from "@/app/_lib/resources/resourceService";
 
 // ============================================
 // RESOURCES PAGE
@@ -65,21 +64,85 @@ const resourceGroups: ResourceGroup[] = [
 ];
 
 export default function ResourcesPage() {
-    const [resources, setResources] = useState<NGOResources>(generateMockResources());
+    const [resources, setResources] = useState<NGOResources | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
 
+    useEffect(() => {
+        let isMounted = true;
+        const fetchResources = async () => {
+            try {
+                const profile = await getMyResources();
+                if (isMounted && profile.capabilities) {
+                    const cap = profile.capabilities;
+                    setResources({
+                        ambulances: cap.ambulances || 0,
+                        rescueBoats: cap.rescue_boats || 0,
+                        trucks: cap.trucks || 0,
+                        fourWheelVehicles: cap.four_wheel_vehicles || 0,
+                        cranes: cap.cranes || 0,
+                        doctors: cap.doctors || 0,
+                        paramedics: cap.paramedics || 0,
+                        rescueDivers: cap.rescue_divers || 0,
+                        volunteersAvailable: cap.volunteers_available || 0,
+                        foodPacketsCapacity: cap.food_packets_capacity || 0,
+                        shelterCapacity: cap.shelter_capacity || 0,
+                        lastUpdated: new Date()
+                    });
+                } else if (isMounted) {
+                    setResources({
+                        ambulances: 0, rescueBoats: 0, trucks: 0, fourWheelVehicles: 0, cranes: 0,
+                        doctors: 0, paramedics: 0, rescueDivers: 0, volunteersAvailable: 0,
+                        foodPacketsCapacity: 0, shelterCapacity: 0, lastUpdated: new Date()
+                    });
+                }
+            } catch (e) {
+                console.error("Failed to load resources:", e);
+                if (isMounted) {
+                    setResources({
+                        ambulances: 0, rescueBoats: 0, trucks: 0, fourWheelVehicles: 0, cranes: 0,
+                        doctors: 0, paramedics: 0, rescueDivers: 0, volunteersAvailable: 0,
+                        foodPacketsCapacity: 0, shelterCapacity: 0, lastUpdated: new Date()
+                    });
+                }
+            }
+        };
+        fetchResources();
+        return () => { isMounted = false; };
+    }, []);
+
+    if (!resources) {
+        return <div className="p-8 text-center text-slate-500">Loading resources...</div>;
+    }
+
+
     const handleUpdateResource = (key: ResourceKey, value: number) => {
-        setResources((prev) => ({ ...prev, [key]: value }));
+        setResources((prev) => prev ? { ...prev, [key]: value } : null);
         setHasChanges(true);
     };
 
     const handleSaveAll = async () => {
         setIsSaving(true);
-        const result = await updateResources(resources);
-        if (result.success) {
-            setResources((prev) => ({ ...prev, lastUpdated: result.updatedAt }));
+        try {
+            // Map the frontend NGOResources object back to the payload
+            const payload = {
+                ambulances: resources.ambulances,
+                rescue_boats: resources.rescueBoats,
+                trucks: resources.trucks,
+                four_wheel_vehicles: resources.fourWheelVehicles,
+                cranes: resources.cranes,
+                doctors: resources.doctors,
+                paramedics: resources.paramedics,
+                rescue_divers: resources.rescueDivers,
+                volunteers_available: resources.volunteersAvailable,
+                food_packets_capacity: resources.foodPacketsCapacity,
+                shelter_capacity: resources.shelterCapacity,
+            };
+            await updateResourceCapacity(payload);
+            setResources((prev) => prev ? { ...prev, lastUpdated: new Date() } : null);
             setHasChanges(false);
+        } catch (e) {
+            console.error("Failed to update resources:", e);
         }
         setIsSaving(false);
     };

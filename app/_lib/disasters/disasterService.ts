@@ -13,12 +13,12 @@ import type {
 // ---------------------------------------------------------------------------
 
 export async function getLiveAlerts(limit = 100, offset = 0): Promise<AlertData[]> {
-  const response = await apiClient.get<AlertData[]>(`/disasters/alerts?limit=${limit}&offset=${offset}`);
+  const response = await apiClient.get<AlertData[]>(`/alerts?limit=${limit}&offset=${offset}`);
   return response.data;
 }
 
 export async function verifyAlert(alertId: string, data: AlertUpdateData): Promise<AlertData> {
-  const response = await apiClient.patch<AlertData>(`/disasters/alerts/${alertId}/status`, data);
+  const response = await apiClient.patch<AlertData>(`/alerts/${alertId}/status`, data);
   return response.data;
 }
 

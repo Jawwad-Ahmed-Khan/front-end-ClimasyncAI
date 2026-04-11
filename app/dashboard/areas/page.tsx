@@ -15,7 +15,8 @@ import {
     Ship,
     Building,
 } from "lucide-react";
-import { generateMockSpecializations, generateMockOperationalAreas } from "../_lib/mockData";
+import { getMyResources } from "@/app/_lib/resources/resourceService";
+import { useEffect } from "react";
 import { addSpecialization, removeSpecialization, addOperationalArea, removeOperationalArea } from "../_lib/actions";
 import { Specialization, OperationalArea } from "../_lib/types";
 
@@ -48,12 +49,37 @@ const districtsByProvince: Record<string, string[]> = {
 };
 
 export default function AreasPage() {
-    const [specializations, setSpecializations] = useState<Specialization[]>(
-        generateMockSpecializations()
-    );
-    const [operationalAreas, setOperationalAreas] = useState<OperationalArea[]>(
-        generateMockOperationalAreas()
-    );
+    const [specializations, setSpecializations] = useState<Specialization[]>([]);
+    const [operationalAreas, setOperationalAreas] = useState<OperationalArea[]>([]);
+
+    useEffect(() => {
+        let isMounted = true;
+        const fetchData = async () => {
+            try {
+                const profile = await getMyResources();
+                if (isMounted) {
+                    setSpecializations(
+                        (profile.specializations || []).map(s => ({
+                            id: s.id,
+                            name: s.specialization,
+                            icon: ""
+                        }))
+                    );
+                    setOperationalAreas(
+                        (profile.areas || []).map(a => ({
+                            id: a.id,
+                            province: a.province,
+                            district: a.district
+                        }))
+                    );
+                }
+            } catch (e) {
+                console.error("Failed to load specializations and areas:", e);
+            }
+        };
+        fetchData();
+        return () => { isMounted = false; };
+    }, []);
 
     // Form states
     const [showAddArea, setShowAddArea] = useState(false);

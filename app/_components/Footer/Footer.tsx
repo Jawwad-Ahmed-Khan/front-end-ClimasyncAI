@@ -80,6 +80,7 @@ export default function Footer() {
                                         src="/images/logos/climasync-logo.png"
                                         alt="ClimasyncAI"
                                         fill
+                                        sizes="48px"
                                         className="object-cover"
                                     />
                                 </motion.div>

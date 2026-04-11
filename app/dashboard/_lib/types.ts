@@ -79,8 +79,8 @@ export interface Task {
     status: TaskStatus;
     assignedAt: Date;
     completedAt?: Date;
-    eventId: string;
-    eventTitle: string;
+    eventId?: string;
+    eventTitle?: string;
     progress?: number;
 }
 

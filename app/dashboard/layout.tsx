@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Sidebar from "./_components/Sidebar";
 import DashboardHeader from "./_components/DashboardHeader";
-import { generateMockNGOProfile, generateMockNotifications } from "./_lib/mockData";
+import { generateMockNGOProfile } from "./_lib/mockData";
 import { NGOProfile, Notification } from "./_lib/types";
 import { ProtectedRoute } from "@/app/_lib/auth/authGuard";
+import { useAuth } from "@/app/_lib/auth/useAuth";
+import { getUnreadCount } from "@/app/_lib/notifications/notificationService";
 
 // ============================================
 // DASHBOARD LAYOUT
@@ -18,18 +20,18 @@ import { ProtectedRoute } from "@/app/_lib/auth/authGuard";
 // Static default values to prevent hydration mismatch
 const defaultProfile: NGOProfile = {
     id: 'ngo-001',
-    orgName: 'Pakistan Relief Foundation',
-    registrationNumber: 'PRF-2019-0847',
-    headOfOperations: 'Ahmed Khan',
-    phone: '+92 300 1234567',
-    email: 'operations@pakistanrelief.org',
-    baseCity: 'Karachi',
-    baseDistrict: 'Karachi South',
-    baseProvince: 'Sindh',
+    orgName: 'Loading...',
+    registrationNumber: '',
+    headOfOperations: '',
+    phone: '',
+    email: '',
+    baseCity: '',
+    baseDistrict: '',
+    baseProvince: '',
     baseLocation: { lat: 24.8607, lng: 67.0011 },
     serviceRadiusKm: 150,
-    isVerified: true,
-    createdAt: new Date('2019-03-15'),
+    isVerified: false,
+    createdAt: new Date(),
 };
 
 export default function DashboardLayout({
@@ -40,19 +42,40 @@ export default function DashboardLayout({
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
+    const { user } = useAuth();
 
     // Use static values for SSR, dynamic values after mount
     const [ngoProfile, setNgoProfile] = useState<NGOProfile>(defaultProfile);
     const [unreadCount, setUnreadCount] = useState(0);
 
-    // Initialize dynamic data only on client side to prevent hydration mismatch
+    // Load real data from auth context and notification API
     useEffect(() => {
         setIsMounted(true);
-        const profile = generateMockNGOProfile();
-        const notifications = generateMockNotifications(10);
-        setNgoProfile(profile);
-        setUnreadCount(notifications.filter((n) => !n.isRead).length);
-    }, []);
+
+        // Build profile from auth user data
+        if (user) {
+            setNgoProfile({
+                id: user.user_id,
+                orgName: user.org_name || 'My Organization',
+                registrationNumber: '',
+                headOfOperations: '',
+                phone: '',
+                email: user.email,
+                baseCity: '',
+                baseDistrict: '',
+                baseProvince: '',
+                baseLocation: { lat: 24.8607, lng: 67.0011 },
+                serviceRadiusKm: 150,
+                isVerified: user.verification_status === 'verified',
+                createdAt: new Date(),
+            });
+        }
+
+        // Load real unread count
+        getUnreadCount()
+            .then((count) => setUnreadCount(count))
+            .catch(() => setUnreadCount(0));
+    }, [user]);
 
     return (
         <ProtectedRoute>

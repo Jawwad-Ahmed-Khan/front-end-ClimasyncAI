@@ -12,9 +12,10 @@ import {
     FileText,
     BarChart3,
 } from "lucide-react";
-import { generateMockTasks } from "../_lib/mockData";
+import { getTasks } from "@/app/_lib/tasks/taskService";
 import { formatTimeAgo, formatStatusLabel, getStatusColor, getPriorityColor } from "../_lib/utils";
 import { Task, TaskStatus, DisasterType } from "../_lib/types";
+import { useEffect } from "react";
 
 // ============================================
 // HISTORY PAGE
@@ -31,7 +32,39 @@ const statusOptions: { value: TaskStatus | ""; label: string }[] = [
 ];
 
 export default function HistoryPage() {
-    const allTasks = useMemo(() => generateMockTasks(50), []);
+    const [allTasks, setAllTasks] = useState<Task[]>([]);
+    
+    useEffect(() => {
+        let isMounted = true;
+        const fetchTasks = async () => {
+            try {
+                const liveTasks = await getTasks();
+                if (isMounted) {
+                    setAllTasks(liveTasks.map(t => ({
+                        id: t.task_id,
+                        label: t.task_label,
+                        description: t.description || '',
+                        taskType: (t.task_type?.toUpperCase() || 'MEDICAL') as Task['taskType'],
+                        disasterType: 'FLOOD' as Task['disasterType'],
+                        requiredQuantity: t.required_quantity || 1,
+                        priority: (t.priority?.toUpperCase() || 'MEDIUM') as Task['priority'],
+                        targetLocation: { lat: 0, lng: 0 },
+                        targetLocationName: t.target_location_name || '',
+                        status: (t.status?.toUpperCase()?.replace(/ /g, '_') || 'ASSIGNED') as TaskStatus,
+                        assignedAt: t.assigned_at ? new Date(t.assigned_at) : new Date(t.created_at),
+                        completedAt: t.completed_at ? new Date(t.completed_at) : undefined,
+                        eventId: t.event_id || undefined,
+                        eventTitle: t.task_label,
+                        progress: t.progress || undefined,
+                    })));
+                }
+            } catch (e) {
+                console.error("Failed to load tasks:", e);
+            }
+        };
+        fetchTasks();
+        return () => { isMounted = false; };
+    }, []);
     const [statusFilter, setStatusFilter] = useState<TaskStatus | "">("");
     const [sortField, setSortField] = useState<"assignedAt" | "status">("assignedAt");
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
@@ -86,14 +119,31 @@ export default function HistoryPage() {
         }
     };
 
-    // Export handlers (mock)
+    // Export handlers
     const handleExportCSV = () => {
-        alert("CSV export would be triggered here");
+        const headers = ['Task', 'Location', 'Type', 'Priority', 'Status', 'Date'];
+        const rows = filteredTasks.map(t => [
+            `"${t.label.replace(/"/g, '""')}"`,
+            `"${t.targetLocationName}"`,
+            t.disasterType,
+            t.priority,
+            t.status,
+            t.assignedAt.toLocaleDateString('en-PK'),
+        ]);
+        const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `climasync-task-history-${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
     };
 
     const handleExportPDF = () => {
-        alert("PDF export would be triggered here");
+        window.print();
     };
+
 
     return (
         <div className="space-y-6">

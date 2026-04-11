@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
     Bell,
@@ -29,9 +29,34 @@ const filterTabs: { value: NotificationType | "ALL" | "UNREAD"; label: string }[
 ];
 
 export default function NotificationsPage() {
-    const [notifications, setNotifications] = useState<Notification[]>(
-        generateMockNotifications(25)
-    );
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    
+    useEffect(() => {
+        let isMounted = true;
+        const fetchNotifs = async () => {
+            try {
+                const { getNotifications } = await import("@/app/_lib/notifications/notificationService");
+                const liveNotifs = await getNotifications(50);
+                if (isMounted) {
+                    setNotifications(liveNotifs.map(n => ({
+                        id: n.notification_id,
+                        title: n.title,
+                        message: n.message || '',
+                        type: (n.notification_type?.toUpperCase() || 'SYSTEM') as Notification['type'],
+                        isRead: n.is_read,
+                        relatedTaskId: n.related_task_id || undefined,
+                        relatedEventId: n.related_event_id || undefined,
+                        changes: undefined,
+                        createdAt: new Date(n.created_at),
+                    })));
+                }
+            } catch (e) {
+                console.error("Failed to fetch notifications", e);
+            }
+        };
+        fetchNotifs();
+        return () => { isMounted = false; };
+    }, []);
     const [activeFilter, setActiveFilter] = useState<NotificationType | "ALL" | "UNREAD">("ALL");
 
     // Filter notifications

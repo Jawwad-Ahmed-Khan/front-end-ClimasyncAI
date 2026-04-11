@@ -13,16 +13,14 @@ import {
     Zap,
 } from "lucide-react";
 import { StatCard, TaskCard, NotificationItem, MiniMap } from "./_components";
-import {
-    generateMockNGOProfile,
-    generateMockStats,
-    generateMockNotifications,
-    generateMockActiveDisasters,
-} from "./_lib/mockData";
+import { getActiveDisasters } from "@/app/_lib/disasters/disasterService";
+import type { DisasterEventData } from "@/app/_lib/disasters/disasterTypes";
 import { getTasks, updateTask } from "@/app/_lib/tasks/taskService";
 import type { TaskResponse } from "@/app/_lib/tasks/taskTypes";
-import { markNotificationRead } from "./_lib/actions";
-import type { Task, TaskStatus } from "@/app/dashboard/_lib/types";
+import { getNotifications, markNotificationsRead } from "@/app/_lib/notifications/notificationService";
+import type { Task, TaskStatus, Notification } from "@/app/dashboard/_lib/types";
+import { toFrontendStatus } from "@/app/dashboard/_lib/utils";
+import { useAuth } from "@/app/_lib/auth/useAuth";
 
 // ============================================
 // HOME PAGE (Dashboard Landing)
@@ -31,38 +29,79 @@ import type { Task, TaskStatus } from "@/app/dashboard/_lib/types";
 // Used as: /dashboard
 
 export default function DashboardHome() {
-    // Mock data - will be replaced with API calls
-    const ngoProfile = generateMockNGOProfile();
-    const stats = generateMockStats();
+    const { user } = useAuth();
     const [tasks, setTasks] = useState<Task[]>([]);
-    const [notifications, setNotifications] = useState(generateMockNotifications(10));
-    const disasters = generateMockActiveDisasters();
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [disasters, setDisasters] = useState<DisasterEventData[]>([]);
+
+    // Derived real stats from live API data
+    const stats = {
+        activeTasks: tasks.filter(t => t.status === 'IN_PROGRESS' || t.status === 'ASSIGNED').length,
+        pendingRequests: tasks.filter(t => t.status === 'PENDING_ACCEPTANCE').length,
+        completedThisMonth: tasks.filter(t => t.status === 'COMPLETED').length,
+        responseRate: tasks.length > 0
+            ? Math.round((tasks.filter(t => t.status !== 'PENDING_ACCEPTANCE').length / tasks.length) * 100)
+            : 0,
+    };
+
+    // Build display name from auth context
+    const displayName = user?.org_name?.split(" ")[0] || "User";
 
     useEffect(() => {
         const loadDashboardData = async () => {
             try {
+                // Load tasks from backend
                 const liveTasks = await getTasks();
                 setTasks(liveTasks.map(t => ({
                     id: t.task_id,
-                    label: t.title,
-                    description: t.description,
-                    taskType: 'MEDICAL', // mapping required_role could be done later
-                    disasterType: 'EARTHQUAKE',
-                    requiredQuantity: 1,
-                    priority: t.priority,
-                    targetLocation: { lat: t.latitude, lng: t.longitude },
-                    targetLocationName: 'Mapped Location',
-                    status: (t.status === 'UNALLOCATED' ? 'PENDING_ACCEPTANCE' : t.status) as TaskStatus,
-                    assignedAt: new Date(t.created_at),
-                    eventId: t.event_id,
-                    eventTitle: t.title,
-                    progress: t.progress_percentage
+                    label: t.task_label,
+                    description: t.description || '',
+                    taskType: (t.task_type?.toUpperCase() || 'MEDICAL') as Task['taskType'],
+                    disasterType: 'FLOOD' as Task['disasterType'],
+                    requiredQuantity: t.required_quantity || 1,
+                    priority: (t.priority?.toUpperCase() || 'MEDIUM') as Task['priority'],
+                    targetLocation: { lat: 0, lng: 0 },
+                    targetLocationName: t.target_location_name || '',
+                    status: toFrontendStatus(t.status),
+                    assignedAt: t.assigned_at ? new Date(t.assigned_at) : new Date(t.created_at),
+                    completedAt: t.completed_at ? new Date(t.completed_at) : undefined,
+                    eventId: t.event_id || undefined,
+                    eventTitle: t.task_label,
+                    progress: t.progress || undefined,
                 })));
             } catch (e) {
-                console.error(e);
+                console.error('Failed to load tasks:', e);
+            }
+
+            try {
+                // Load notifications from backend
+                const liveNotifs = await getNotifications(10);
+                setNotifications(liveNotifs.map(n => ({
+                    id: n.notification_id,
+                    title: n.title,
+                    message: n.message || '',
+                    type: (n.notification_type?.toUpperCase() || 'SYSTEM') as Notification['type'],
+                    isRead: n.is_read,
+                    relatedTaskId: n.related_task_id || undefined,
+                    relatedEventId: n.related_event_id || undefined,
+                    changes: undefined,
+                    createdAt: new Date(n.created_at),
+                })));
+            } catch (e) {
+                console.error('Failed to load notifications:', e);
             }
         };
-        loadDashboardData();
+        const loadAllData = async () => {
+            await loadDashboardData();
+            // Load disaster events
+            try {
+                const liveDisasters = await getActiveDisasters(10);
+                setDisasters(liveDisasters);
+            } catch (e) {
+                console.error('Failed to load disasters:', e);
+            }
+        };
+        loadAllData();
     }, []);
 
     // Get recent items
@@ -71,26 +110,26 @@ export default function DashboardHome() {
 
     // Task action handlers
     const handleAcceptTask = async (taskId: string) => {
-        await updateTask(taskId, { status: 'ASSIGNED' });
+        await updateTask(taskId, { status: 'assigned' });
         setTasks((prev) =>
             prev.map((t) => (t.id === taskId ? { ...t, status: "ASSIGNED" as const } : t))
         );
     };
 
     const handleRejectTask = async (taskId: string) => {
-        await updateTask(taskId, { status: 'UNALLOCATED' });
+        await updateTask(taskId, { status: 'unallocated' });
         setTasks((prev) => prev.filter((t) => t.id !== taskId));
     };
 
     const handleStartTask = async (taskId: string) => {
-        await updateTask(taskId, { status: 'IN_PROGRESS' });
+        await updateTask(taskId, { status: 'in_progress' });
         setTasks((prev) =>
             prev.map((t) => (t.id === taskId ? { ...t, status: "IN_PROGRESS" as const, progress: 0 } : t))
         );
     };
 
     const handleCompleteTask = async (taskId: string) => {
-        await updateTask(taskId, { status: 'COMPLETED', completion_notes: "Task completed successfully" });
+        await updateTask(taskId, { status: 'completed', completion_notes: "Task completed successfully" });
         setTasks((prev) =>
             prev.map((t) => (t.id === taskId ? { ...t, status: "COMPLETED" as const, completedAt: new Date() } : t))
         );
@@ -98,7 +137,11 @@ export default function DashboardHome() {
 
     // Notification action handler
     const handleMarkNotificationRead = async (id: string) => {
-        await markNotificationRead(id);
+        try {
+            await markNotificationsRead([id]);
+        } catch (e) {
+            console.error('Failed to mark notification read:', e);
+        }
         setNotifications((prev) =>
             prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
         );
@@ -122,14 +165,14 @@ export default function DashboardHome() {
                     <div>
                         <div className="flex items-center gap-2 mb-2">
                             <h1 className="text-2xl md:text-3xl font-bold text-white">
-                                Welcome back, {ngoProfile.headOfOperations.split(" ")[0]}!
+                                Welcome back, {displayName}!
                             </h1>
-                            {ngoProfile.isVerified && (
+                            {user?.verification_status === 'verified' && (
                                 <BadgeCheck className="w-6 h-6 text-emerald-300" />
                             )}
                         </div>
                         <p className="text-white/80">
-                            {ngoProfile.orgName} • {ngoProfile.baseCity}, {ngoProfile.baseProvince}
+                            {user?.org_name || 'ClimaSync.AI'} • {user?.email || ''}
                         </p>
                     </div>
                     <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/20 backdrop-blur-sm">
@@ -193,7 +236,7 @@ export default function DashboardHome() {
                                 <ArrowRight size={14} />
                             </Link>
                         </div>
-                        <MiniMap disasters={disasters} />
+                        <MiniMap disasters={disasters as any} />
                     </motion.div>
 
                     {/* Recent Tasks */}

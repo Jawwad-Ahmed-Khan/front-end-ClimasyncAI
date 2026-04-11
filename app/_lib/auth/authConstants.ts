@@ -20,7 +20,7 @@ export const AUTH_ENDPOINTS = {
   VERIFY_OTP: "/auth/verify-otp",
   RESEND_OTP: "/auth/resend-otp",
   // Future endpoints (placeholders)
-  REFRESH_TOKEN: "/auth/refresh",
+  REFRESH_TOKEN: "/auth/refresh-token",
   LOGOUT: "/auth/logout",
   ME: "/auth/me",
   SOCIAL_LOGIN: (provider: string) => `/auth/social/${provider}`,

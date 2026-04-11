@@ -1,78 +1,43 @@
 // ============================================
-// SIMULATED API ACTIONS
+// REAL API ACTIONS
 // ============================================
-// Mock action functions that simulate API calls
-// These will be replaced with real API integration later
 
 import { NGOResources } from './types';
-
-// Simulate network delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import { updateTask } from '@/app/_lib/tasks/taskService';
+import { markNotificationsRead as apiMarkRead, markAllNotificationsRead as apiMarkAllRead } from '@/app/_lib/notifications/notificationService';
+import { updateResourceCapacity, addOperationalArea as apiAddArea, removeOperationalArea as apiRemoveArea, addSpecialization as apiAddSpec, removeSpecialization as apiRemoveSpec } from '@/app/_lib/resources/resourceService';
+import { apiClient } from '@/app/_lib/apiClient';
 
 // ============================================
 // TASK ACTIONS
 // ============================================
 
-/**
- * acceptTask
- * NGO accepts a pending task assignment.
- * Changes status: PENDING_ACCEPTANCE → ASSIGNED
- * Used in: Task card, Notification actions
- */
 export async function acceptTask(taskId: string): Promise<{ success: boolean; message: string }> {
-    await delay(500);
-    console.log(`[ACTION] Accepting task: ${taskId}`);
+    await updateTask(taskId, { status: 'assigned' as any });
     return { success: true, message: 'Task accepted successfully' };
 }
 
-/**
- * rejectTask
- * NGO rejects a task assignment.
- * Task returns to UNALLOCATED for reassignment.
- * Used in: Task card, Notification actions
- */
 export async function rejectTask(taskId: string, reason?: string): Promise<{ success: boolean; message: string }> {
-    await delay(500);
-    console.log(`[ACTION] Rejecting task: ${taskId}`, reason ? `Reason: ${reason}` : '');
+    await updateTask(taskId, { status: 'unallocated' as any, change_reason: reason });
     return { success: true, message: 'Task rejected and returned for reassignment' };
 }
 
-/**
- * startTask
- * NGO begins working on assigned task.
- * Changes status: ASSIGNED → IN_PROGRESS
- * Used in: Task card
- */
 export async function startTask(taskId: string): Promise<{ success: boolean; message: string }> {
-    await delay(500);
-    console.log(`[ACTION] Starting task: ${taskId}`);
+    await updateTask(taskId, { status: 'in_progress' as any });
     return { success: true, message: 'Task marked as In Progress' };
 }
 
-/**
- * updateTaskProgress
- * Updates completion percentage of task.
- * Used in: Task detail modal
- */
 export async function updateTaskProgress(taskId: string, progress: number): Promise<{ success: boolean; message: string }> {
-    await delay(300);
-    console.log(`[ACTION] Updating task ${taskId} progress to ${progress}%`);
+    await updateTask(taskId, { progress });
     return { success: true, message: `Progress updated to ${progress}%` };
 }
 
-/**
- * completeTask
- * Marks task as finished with completion notes.
- * Changes status: IN_PROGRESS → COMPLETED
- * Used in: Task detail modal
- */
 export async function completeTask(
     taskId: string,
     notes: string,
     proofImageUrl?: string
 ): Promise<{ success: boolean; message: string }> {
-    await delay(800);
-    console.log(`[ACTION] Completing task: ${taskId}`, { notes, proofImageUrl });
+    await updateTask(taskId, { status: 'completed' as any, completion_notes: notes, proof_image_url: proofImageUrl });
     return { success: true, message: 'Task completed successfully' };
 }
 
@@ -80,39 +45,21 @@ export async function completeTask(
 // NOTIFICATION ACTIONS
 // ============================================
 
-/**
- * markNotificationRead
- * Marks single notification as read.
- * Used in: Clicking notification item
- */
 export async function markNotificationRead(notificationId: string): Promise<{ success: boolean }> {
-    await delay(200);
-    console.log(`[ACTION] Marking notification read: ${notificationId}`);
+    await apiMarkRead([notificationId]);
     return { success: true };
 }
 
-/**
- * markAllNotificationsRead
- * Marks all notifications as read.
- * Used in: "Mark All Read" button
- */
 export async function markAllNotificationsRead(): Promise<{ success: boolean; count: number }> {
-    await delay(500);
-    console.log('[ACTION] Marking all notifications as read');
-    return { success: true, count: 15 };
+    await apiMarkAllRead();
+    return { success: true, count: 0 };
 }
 
-/**
- * acknowledgeTaskUpdate
- * Confirms NGO has seen task modification.
- * Used in: TASK_UPDATED notification action
- */
 export async function acknowledgeTaskUpdate(
     notificationId: string,
     taskId: string
 ): Promise<{ success: boolean; message: string }> {
-    await delay(300);
-    console.log(`[ACTION] Acknowledging task update: ${taskId} (notification: ${notificationId})`);
+    await apiMarkRead([notificationId]);
     return { success: true, message: 'Update acknowledged' };
 }
 
@@ -120,16 +67,23 @@ export async function acknowledgeTaskUpdate(
 // RESOURCE MANAGEMENT
 // ============================================
 
-/**
- * updateResources
- * Updates NGO's available resources.
- * Used in: Resources tab form submission
- */
 export async function updateResources(
     resources: Partial<NGOResources>
 ): Promise<{ success: boolean; message: string; updatedAt: Date }> {
-    await delay(800);
-    console.log('[ACTION] Updating resources:', resources);
+    const payload: any = {};
+    if (resources.ambulances !== undefined) payload.ambulances = resources.ambulances;
+    if (resources.rescueBoats !== undefined) payload.rescue_boats = resources.rescueBoats;
+    if (resources.trucks !== undefined) payload.trucks = resources.trucks;
+    if (resources.fourWheelVehicles !== undefined) payload.four_wheel_vehicles = resources.fourWheelVehicles;
+    if (resources.cranes !== undefined) payload.cranes = resources.cranes;
+    if (resources.doctors !== undefined) payload.doctors = resources.doctors;
+    if (resources.paramedics !== undefined) payload.paramedics = resources.paramedics;
+    if (resources.rescueDivers !== undefined) payload.rescue_divers = resources.rescueDivers;
+    if (resources.volunteersAvailable !== undefined) payload.volunteers_available = resources.volunteersAvailable;
+    if (resources.foodPacketsCapacity !== undefined) payload.food_packets_capacity = resources.foodPacketsCapacity;
+    if (resources.shelterCapacity !== undefined) payload.shelter_capacity = resources.shelterCapacity;
+
+    await updateResourceCapacity(payload);
     return {
         success: true,
         message: 'Resources updated successfully',
@@ -141,85 +95,50 @@ export async function updateResources(
 // PROFILE ACTIONS
 // ============================================
 
-/**
- * updateProfile
- * Updates NGO profile information.
- * Used in: Profile tab form submission
- */
 export async function updateProfile(
     profileData: Record<string, unknown>
 ): Promise<{ success: boolean; message: string }> {
-    await delay(800);
-    console.log('[ACTION] Updating profile:', profileData);
+    await apiClient.patch('/auth/me', profileData);
     return { success: true, message: 'Profile updated successfully' };
 }
 
-/**
- * changePassword
- * Changes account password.
- * Used in: Profile tab settings
- */
 export async function changePassword(
     currentPassword: string,
     newPassword: string
 ): Promise<{ success: boolean; message: string }> {
-    await delay(600);
-    console.log('[ACTION] Changing password');
-    if (currentPassword === 'wrong') {
-        return { success: false, message: 'Current password is incorrect' };
+    // Auth endpoints usually have a specific password change endpoint. 
+    // Assuming /auth/password
+    try {
+        await apiClient.put('/auth/password', { current_password: currentPassword, new_password: newPassword });
+        return { success: true, message: 'Password changed successfully' };
+    } catch {
+        return { success: false, message: 'Current password is incorrect or request failed' };
     }
-    return { success: true, message: 'Password changed successfully' };
 }
 
 // ============================================
 // AREAS MANAGEMENT
 // ============================================
 
-/**
- * addSpecialization
- * Adds a new specialization to NGO.
- * Used in: Areas tab
- */
 export async function addSpecialization(name: string): Promise<{ success: boolean; id: string }> {
-    await delay(400);
-    const id = `spec-${Date.now()}`;
-    console.log(`[ACTION] Adding specialization: ${name}`);
-    return { success: true, id };
+    const res = await apiAddSpec(name);
+    return { success: true, id: res.id };
 }
 
-/**
- * removeSpecialization
- * Removes a specialization from NGO.
- * Used in: Areas tab
- */
 export async function removeSpecialization(id: string): Promise<{ success: boolean }> {
-    await delay(300);
-    console.log(`[ACTION] Removing specialization: ${id}`);
+    await apiRemoveSpec(id);
     return { success: true };
 }
 
-/**
- * addOperationalArea
- * Adds a new operational area.
- * Used in: Areas tab
- */
 export async function addOperationalArea(
     district: string,
     province: string
 ): Promise<{ success: boolean; id: string }> {
-    await delay(400);
-    const id = `area-${Date.now()}`;
-    console.log(`[ACTION] Adding operational area: ${district}, ${province}`);
-    return { success: true, id };
+    const res = await apiAddArea(province, district);
+    return { success: true, id: res.id };
 }
 
-/**
- * removeOperationalArea
- * Removes an operational area.
- * Used in: Areas tab
- */
 export async function removeOperationalArea(id: string): Promise<{ success: boolean }> {
-    await delay(300);
-    console.log(`[ACTION] Removing operational area: ${id}`);
+    await apiRemoveArea(id);
     return { success: true };
 }

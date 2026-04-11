@@ -76,6 +76,7 @@ export default function Navbar() {
                                             src="/images/logos/climasync-logo.png"
                                             alt="ClimasyncAI Logo"
                                             fill
+                                            sizes="44px"
                                             className="object-cover"
                                             priority
                                         />

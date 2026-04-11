@@ -62,6 +62,7 @@ export default function AuthLayout({
                   src="/images/logos/climasync-logo.png"
                   alt="ClimasyncAI"
                   fill
+                  sizes="48px"
                   className="object-cover"
                 />
               </div>
