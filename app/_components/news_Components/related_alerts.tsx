@@ -153,7 +153,7 @@ export default function RelatedAlerts() {
 
                 {/* Bottom Info */}
                 <div className="mt-12 text-center">
-                    <div className="inline-flex items-center gap-6 px-8 py-4 bg-blue-50 rounded-xl border border-blue-200">
+                    <div className="inline-flex flex-wrap items-center justify-center gap-4 px-6 py-4 bg-blue-50 rounded-xl border border-blue-200">
                         <div className="flex items-center gap-2">
                             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                             <span className="text-gray-700 font-medium">Real-time Updates</span>

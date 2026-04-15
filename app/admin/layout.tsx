@@ -114,18 +114,12 @@ export default function AdminLayout({
             )}
 
             {/* Main Content */}
-            <main className="relative z-10 pt-36 min-h-screen transition-all duration-300 lg:ml-0">
-                <div
-                    className="hidden lg:block"
-                    style={{ marginLeft: isSidebarCollapsed ? 80 : 280 }}
-                />
-                <div
-                    className="lg:ml-0"
-                    style={{ marginLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 ? (isSidebarCollapsed ? 80 : 280) : 0 }}
-                >
-                    <div className="p-4 lg:p-6">
-                        {children}
-                    </div>
+            <main className={`
+                relative z-10 pt-36 min-h-screen transition-all duration-300
+                ml-0 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'}
+            `}>
+                <div className="p-4 lg:p-6">
+                    {children}
                 </div>
             </main>
         </div>

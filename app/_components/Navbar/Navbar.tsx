@@ -59,7 +59,7 @@ export default function Navbar() {
                     <div className="absolute inset-0 bg-linear-to-b from-white/2 to-transparent pointer-events-none" />
 
                     {/* Content Container */}
-                    <div className="relative flex items-center px-6 md:px-10 lg:px-16 py-4">
+                    <div className="relative flex items-center h-20 px-6 md:px-10 lg:px-16">
                         {/* Left Section - Logo */}
                         <div className="shrink-0">
                             <Link href="/" className="flex items-center gap-4 group">

@@ -83,10 +83,12 @@ export default function AdminHeader({
 
     return (
         <header
-            className="fixed top-20 right-0 z-30 h-16 bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/50 transition-all duration-300 left-0 lg:left-auto"
-            style={{
-                left: typeof window !== 'undefined' && window.innerWidth >= 1024 ? (isSidebarCollapsed ? 80 : 280) : 0,
-            }}
+            className={`
+                fixed top-20 right-0 z-30 h-16 
+                bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/50 
+                transition-all duration-300
+                left-0 ${isSidebarCollapsed ? 'lg:left-20' : 'lg:left-[280px]'}
+            `}
         >
 
             <div className="h-full px-4 lg:px-6 flex items-center justify-between gap-4">
