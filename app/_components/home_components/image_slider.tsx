@@ -61,7 +61,7 @@ export function ImageSlider() {
         </p>
 
         {/* Buttons Section */}
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-4 justify-center">
           <Link href="/map" className="bg-blue-600 hover:bg-blue-700 hover:scale-110 text-white font-semibold py-3 px-8 rounded-full transition duration-300 cursor-pointer">
             View Live Map
           </Link>

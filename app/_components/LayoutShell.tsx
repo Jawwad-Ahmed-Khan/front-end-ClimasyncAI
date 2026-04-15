@@ -15,12 +15,25 @@ import { Footer } from "./Footer";
 /** Routes that should NOT show the global Navbar/Footer */
 const AUTH_ROUTES = ["/login", "/register", "/verify", "/forgot-password", "/reset-password"];
 
+/** Routes that have their own layout (no global main wrapper padding) */
+const DASHBOARD_ROUTES = ["/dashboard", "/admin"];
+
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route));
+  const isDashboardRoute = DASHBOARD_ROUTES.some((route) => pathname.startsWith(route));
 
   if (isAuthRoute) {
     return <>{children}</>;
+  }
+
+  if (isDashboardRoute) {
+    return (
+      <>
+        <Navbar />
+        {children}
+      </>
+    );
   }
 
   return (

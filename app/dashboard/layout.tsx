@@ -127,20 +127,11 @@ export default function DashboardLayout({
 
             {/* Main Content */}
             <main
-                className="pt-36 min-h-screen transition-all duration-300"
-                style={{
-                    marginLeft: isSidebarCollapsed ? 80 : 280,
-                }}
+                className={`
+                    pt-36 min-h-screen transition-all duration-300
+                    ml-0 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'}
+                `}
             >
-                {/* Hide margin on mobile */}
-                <style jsx>{`
-          @media (max-width: 1023px) {
-            main {
-              margin-left: 0 !important;
-            }
-          }
-        `}</style>
-
                 <div className="p-4 lg:p-6">
                     {children}
                 </div>

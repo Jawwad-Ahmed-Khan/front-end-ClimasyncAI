@@ -372,7 +372,7 @@ export default function MapPage() {
     // Show loading if Mapbox token is missing
     if (!MAPBOX_TOKEN) {
         return (
-            <div className="w-screen h-screen bg-slate-900 flex items-center justify-center">
+            <div className="w-full bg-slate-900 flex items-center justify-center" style={{ height: 'calc(100vh - 80px)' }}>
                 <div className="bg-slate-800 p-8 rounded-2xl border border-red-500/50 max-w-md">
                     <h2 className="text-xl font-bold text-red-500 mb-4">Configuration Error</h2>
                     <p className="text-slate-300 mb-4">
@@ -392,12 +392,12 @@ export default function MapPage() {
     }
 
     return (
-        <div className="relative w-screen h-screen overflow-hidden bg-slate-900">
+        <div className="relative w-full overflow-hidden bg-slate-900" style={{ height: 'calc(100vh - 80px)' }}>
             {/* Map Container */}
             <div
                 ref={mapContainerRef}
-                className="absolute inset-0 top-16"
-                style={{ width: '100%', height: 'calc(100% - 64px)' }}
+                className="absolute inset-0"
+                style={{ width: '100%', height: '100%' }}
             />
 
             {/* Loading Overlay */}
