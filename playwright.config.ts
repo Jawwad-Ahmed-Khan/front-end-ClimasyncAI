@@ -15,7 +15,7 @@ export default defineConfig({
   workers: 1,                    // Single worker prevents race conditions on OTP file
   timeout: 90000,                // 90s per test (OTP emails take time)
   reporter: [['html'], ['list']],
-  globalSetup: './tests/global-setup.js',
+  // globalSetup: './tests/global-setup.js',
 
   use: {
     baseURL: 'http://localhost:3000',

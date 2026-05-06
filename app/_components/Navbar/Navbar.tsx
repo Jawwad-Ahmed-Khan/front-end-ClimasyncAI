@@ -15,6 +15,7 @@ const navLinks = [
     { href: "/map", label: "Map" },
     { href: "/task", label: "Task" },
     { href: "/news", label: "News" },
+    { href: "/ai-verify", label: "AI Verify" },
     { href: "/about", label: "About" },
 ];
 

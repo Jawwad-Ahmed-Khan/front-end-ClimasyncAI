@@ -7,8 +7,8 @@ const { registerAndVerify, waitForOTP, TEST_PASS } = require('./helpers/auth.js'
 const fs = require('fs');
 const path = require('path');
 
-const uniqueEmail = `auth_test_${Date.now()}@example.com`;
-const uniqueOrg   = `AuthTestNGO_${Date.now()}`;
+const uniqueEmail = `talha.asim19308@gmail.com`;
+const uniqueOrg = `AuthTestNGO_${Date.now()}`;
 
 test.describe('01 — Authentication', () => {
   test.setTimeout(120000);
