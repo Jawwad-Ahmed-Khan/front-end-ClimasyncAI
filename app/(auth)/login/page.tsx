@@ -43,7 +43,7 @@ function LoginSkeleton() {
 }
 
 function LoginContent() {
-  const { login, isAuthenticated, isLoading, error, clearError } = useAuth();
+  const { login, isAuthenticated, isLoading, error, clearError, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect");
@@ -57,10 +57,16 @@ function LoginContent() {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      router.replace(redirectPath || "/dashboard");
+    if (isAuthenticated && user) {
+      if (redirectPath) {
+        router.replace(redirectPath);
+      } else if (user.role === "admin" || user.role === "super_admin") {
+        router.replace("/admin");
+      } else {
+        router.replace("/dashboard");
+      }
     }
-  }, [isAuthenticated, router, redirectPath]);
+  }, [isAuthenticated, user, router, redirectPath]);
 
   // Sync context error to local form error
   useEffect(() => {

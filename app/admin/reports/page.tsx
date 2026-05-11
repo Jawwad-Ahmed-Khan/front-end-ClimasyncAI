@@ -13,7 +13,7 @@ import {
     ClipboardList,
     AlertTriangle,
 } from "lucide-react";
-import { generateMockReportData } from "../_lib/adminMockData";
+import { fetchDetailedReport } from "../_lib/adminService";
 import type { ReportData } from "../_lib/adminTypes";
 
 // ============================================
@@ -26,8 +26,17 @@ export default function ReportsPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        setData(generateMockReportData());
-        setIsLoading(false);
+        const load = async () => {
+            try {
+                const data = await fetchDetailedReport();
+                setData(data);
+            } catch (e) {
+                console.error("Failed to load detailed report", e);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        load();
     }, []);
 
     if (isLoading || !data) {

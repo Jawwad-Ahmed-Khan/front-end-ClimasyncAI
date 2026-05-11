@@ -11,7 +11,8 @@ import {
     User,
     RefreshCw,
 } from "lucide-react";
-import { generateMockConversations, generateMockMessages, formatTimeAgo } from "../_lib/adminMockData";
+import { fetchConversations, fetchConversationMessages, sendMessage } from "../_lib/adminService";
+import { formatTimeAgo } from "../_lib/adminUtils";
 import type { Conversation, Message } from "../_lib/adminTypes";
 
 // ============================================
@@ -26,18 +27,50 @@ export default function MessagesPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const convs = generateMockConversations(10);
-        setConversations(convs);
-        if (convs.length > 0) {
-            setSelectedConv(convs[0].id);
-            setMessages(generateMockMessages(convs[0].id, 8));
-        }
-        setIsLoading(false);
+        const load = async () => {
+            try {
+                const convs = await fetchConversations();
+                setConversations(convs);
+                if (convs.length > 0) {
+                    setSelectedConv(convs[0].id);
+                    const msgs = await fetchConversationMessages(convs[0].id);
+                    setMessages(msgs);
+                }
+            } catch (e) {
+                console.error("Failed to load conversations", e);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        load();
     }, []);
 
-    const handleSelectConversation = (convId: string) => {
+    const handleSelectConversation = async (convId: string) => {
         setSelectedConv(convId);
-        setMessages(generateMockMessages(convId, 8));
+        try {
+            const msgs = await fetchConversationMessages(convId);
+            setMessages(msgs);
+        } catch (e) {
+            console.error("Failed to load messages", e);
+        }
+    };
+
+    const handleSendMessage = async () => {
+        if (!newMessage.trim() || !selectedConv) return;
+        
+        const conv = conversations.find(c => c.id === selectedConv);
+        if (!conv) return;
+
+        try {
+            const sentMsg = await sendMessage({
+                receiver_id: conv.participantId,
+                content: newMessage.trim(),
+            });
+            setMessages(prev => [...prev, sentMsg]);
+            setNewMessage('');
+        } catch (e) {
+            console.error("Failed to send message", e);
+        }
     };
 
     const selectedConversation = conversations.find(c => c.id === selectedConv);
@@ -151,11 +184,17 @@ export default function MessagesPage() {
                                     type="text"
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') handleSendMessage();
+                                    }}
                                     placeholder="Type a message..."
                                     className="flex-1 px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700/50
                                               text-white placeholder-slate-500 focus:outline-none focus:border-red-500/50"
                                 />
-                                <button className="p-2.5 rounded-xl bg-linear-to-r from-red-500 to-orange-500 text-white">
+                                <button 
+                                    onClick={handleSendMessage}
+                                    className="p-2.5 rounded-xl bg-linear-to-r from-red-500 to-orange-500 text-white"
+                                >
                                     <Send className="w-5 h-5" />
                                 </button>
                             </div>

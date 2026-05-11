@@ -16,7 +16,8 @@ import {
     AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
-import { generateMockAdminTasks, formatTimeAgo, getStatusColor, getPriorityColor } from "../_lib/adminMockData";
+import { fetchTasks } from "../_lib/adminService";
+import { formatTimeAgo, getStatusColor, getPriorityColor } from "../_lib/adminUtils";
 import type { AdminTask, AdminTaskStatus, TaskPriority } from "../_lib/adminTypes";
 
 // ============================================
@@ -55,8 +56,18 @@ export default function TasksPage() {
 
     // Load data
     useEffect(() => {
-        setTasks(generateMockAdminTasks(30));
-        setIsLoading(false);
+        const load = async () => {
+            try {
+                const data = await fetchTasks();
+                setTasks(data);
+                setFilteredTasks(data);
+            } catch (e) {
+                console.error("Failed to fetch tasks", e);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        load();
     }, []);
 
     // Filter tasks

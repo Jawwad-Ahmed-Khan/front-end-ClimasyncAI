@@ -13,7 +13,8 @@ import {
     Clock,
 } from "lucide-react";
 import Link from "next/link";
-import { generateMockDisasters, formatTimeAgo, getStatusColor } from "../_lib/adminMockData";
+import { fetchDisasters } from "../_lib/adminService";
+import { formatTimeAgo, getStatusColor } from "../_lib/adminUtils";
 import type { DisasterEvent } from "../_lib/adminTypes";
 
 // ============================================
@@ -26,8 +27,17 @@ export default function DisastersPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        setDisasters(generateMockDisasters(12));
-        setIsLoading(false);
+        const load = async () => {
+            try {
+                const data = await fetchDisasters();
+                setDisasters(data);
+            } catch (e) {
+                console.error("Failed to load disasters", e);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        load();
     }, []);
 
     const filtered = searchQuery

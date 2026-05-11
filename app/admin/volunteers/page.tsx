@@ -17,7 +17,7 @@ import {
     Eye,
     ClipboardList,
 } from "lucide-react";
-import { generateMockVolunteers } from "../_lib/adminMockData";
+import { fetchNGOs } from "../_lib/adminService";
 import type { Volunteer, VolunteerCapability } from "../_lib/adminTypes";
 
 // ============================================
@@ -38,8 +38,34 @@ export default function VolunteersPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        setVolunteers(generateMockVolunteers(20));
-        setIsLoading(false);
+        const load = async () => {
+            try {
+                const ngos = await fetchNGOs('VERIFIED');
+                const mappedVolunteers: Volunteer[] = ngos.map(ngo => ({
+                    id: ngo.id,
+                    userId: ngo.id,
+                    name: ngo.orgName,
+                    email: ngo.email,
+                    phone: ngo.phone,
+                    city: ngo.baseCity || 'Unknown',
+                    district: ngo.baseDistrict || 'Unknown',
+                    province: ngo.baseProvince || 'Unknown',
+                    coordinates: ngo.baseLocation || { lat: 30.0, lng: 70.0 },
+                    capabilities: ngo.specializations as VolunteerCapability[] || ['FIRST_AID'],
+                    tasksCompleted: ngo.tasksCompleted || 0,
+                    rating: ngo.rating || 5,
+                    isActive: ngo.isOnline || true,
+                    lastActiveAt: ngo.lastActiveAt || new Date(),
+                    createdAt: ngo.createdAt || new Date(),
+                }));
+                setVolunteers(mappedVolunteers);
+            } catch (e) {
+                console.error("Failed to load volunteers", e);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        load();
     }, []);
 
     const filtered = searchQuery

@@ -53,13 +53,21 @@ export default function RainLayer({
     useEffect(() => {
         if (!map || !rainData) return;
 
+        const validPoints = rainData.points.filter(
+            (point) =>
+                typeof point.longitude === 'number' &&
+                typeof point.latitude === 'number' &&
+                !isNaN(point.longitude) &&
+                !isNaN(point.latitude)
+        );
+
         // Add source if not exists
         if (!map.getSource(sourceId)) {
             map.addSource(sourceId, {
                 type: 'geojson',
                 data: {
                     type: 'FeatureCollection',
-                    features: rainData.points.map((point) => ({
+                    features: validPoints.map((point) => ({
                         type: 'Feature',
                         geometry: {
                             type: 'Point',
@@ -76,7 +84,7 @@ export default function RainLayer({
             // Update data
             (map.getSource(sourceId) as mapboxgl.GeoJSONSource).setData({
                 type: 'FeatureCollection',
-                features: rainData.points.map((point) => ({
+                features: validPoints.map((point) => ({
                     type: 'Feature',
                     geometry: {
                         type: 'Point',
@@ -203,7 +211,7 @@ export default function RainLayer({
 
                     // Get screen coordinates of rain data points
                     const rainPoints = this.rainData.points
-                        .filter(p => p.rain > 0.5)
+                        .filter(p => p.rain > 0.5 && typeof p.longitude === 'number' && typeof p.latitude === 'number' && !isNaN(p.longitude) && !isNaN(p.latitude))
                         .map(point => {
                             const proj = map.project([point.longitude, point.latitude]);
                             return {

@@ -18,9 +18,7 @@ import Link from "next/link";
 import AlertCard from "./_components/AlertCard";
 import StatCard from "./_components/StatCard";
 import LiveMap from "./_components/LiveMap";
-import {
-    generateMockNGOsWithPerformance,
-} from "./_lib/adminMockData";
+import { fetchNGOs } from "./_lib/adminService";
 import { getAdminGlobalReport } from "@/app/_lib/admin/adminService";
 import { getLiveAlerts, getActiveDisasters } from "@/app/_lib/disasters/disasterService";
 import type { AdminReportResponse } from "@/app/_lib/admin/adminTypes";
@@ -98,8 +96,10 @@ export default function CommandCenterPage() {
                 } as DisasterEvent)));
             } catch (e) { console.error(e); }
 
-            const allNGOs = generateMockNGOsWithPerformance(15);
-            setOnlineNGOs(allNGOs.filter(ngo => ngo.isOnline));
+            try {
+                const allNGOs = await fetchNGOs("verified");
+                setOnlineNGOs(allNGOs.slice(0, 8));
+            } catch (e) { console.error("Failed to load NGOs", e); }
             setIsLoading(false);
             setLastRefresh(new Date());
         };

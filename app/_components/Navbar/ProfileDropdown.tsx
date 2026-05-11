@@ -133,20 +133,22 @@ export default function ProfileDropdown() {
                             <div className="p-3 space-y-1">
                                 {isAuthenticated ? (
                                     <>
-                                        {/* Dashboard Link */}
-                                        <Link href="/dashboard" onClick={() => setIsOpen(false)}>
-                                            <motion.div
-                                                whileHover={{ x: 4 }}
-                                                className="flex items-center gap-3 px-4 py-3 rounded-xl
-                                                    hover:bg-white/5 text-slate-300 hover:text-white 
-                                                    transition-all duration-200 group"
-                                            >
-                                                <div className="w-8 h-8 rounded-lg bg-white/5 group-hover:bg-white/10 flex items-center justify-center transition-colors">
-                                                    <LayoutDashboard className="w-4 h-4 text-slate-400 group-hover:text-cyan-400 transition-colors" />
-                                                </div>
-                                                <span className="font-medium text-sm">Dashboard</span>
-                                            </motion.div>
-                                        </Link>
+                                        {/* Dashboard Link (NGO only) */}
+                                        {!isAdmin && (
+                                            <Link href="/dashboard" onClick={() => setIsOpen(false)}>
+                                                <motion.div
+                                                    whileHover={{ x: 4 }}
+                                                    className="flex items-center gap-3 px-4 py-3 rounded-xl
+                                                        hover:bg-white/5 text-slate-300 hover:text-white 
+                                                        transition-all duration-200 group"
+                                                >
+                                                    <div className="w-8 h-8 rounded-lg bg-white/5 group-hover:bg-white/10 flex items-center justify-center transition-colors">
+                                                        <LayoutDashboard className="w-4 h-4 text-slate-400 group-hover:text-cyan-400 transition-colors" />
+                                                    </div>
+                                                    <span className="font-medium text-sm">Dashboard</span>
+                                                </motion.div>
+                                            </Link>
+                                        )}
 
                                         {/* Admin Link (role-based) */}
                                         {isAdmin && (

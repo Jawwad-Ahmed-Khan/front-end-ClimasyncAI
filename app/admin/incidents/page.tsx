@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import AlertCard from "../_components/AlertCard";
 import PipelineModal from "../_components/PipelineModal";
-import { generateMockAlerts } from "../_lib/adminMockData";
+import { fetchAlerts } from "../_lib/adminService";
 import type { Alert, AlertStatus } from "../_lib/adminTypes";
 
 // ============================================
@@ -45,11 +45,16 @@ export default function IncidentsPage() {
 
     // Load data
     useEffect(() => {
-        const loadData = () => {
-            const mockAlerts = generateMockAlerts(20);
-            setAlerts(mockAlerts);
-            setFilteredAlerts(mockAlerts);
-            setIsLoading(false);
+        const loadData = async () => {
+            try {
+                const liveAlerts = await fetchAlerts();
+                setAlerts(liveAlerts);
+                setFilteredAlerts(liveAlerts);
+            } catch (e) {
+                console.error("Failed to load alerts", e);
+            } finally {
+                setIsLoading(false);
+            }
         };
         loadData();
     }, []);

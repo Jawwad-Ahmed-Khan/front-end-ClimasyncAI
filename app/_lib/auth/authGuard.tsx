@@ -39,7 +39,11 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
     // Role-based access check
     if (requiredRoles && requiredRoles.length > 0 && user) {
       if (!requiredRoles.includes(user.role)) {
-        router.replace(AUTH_ROUTES.DASHBOARD);
+        if (user.role === "admin" || user.role === "super_admin") {
+          router.replace("/admin");
+        } else {
+          router.replace(AUTH_ROUTES.DASHBOARD);
+        }
       }
     }
   }, [isAuthenticated, isLoading, user, requiredRoles, router, pathname]);

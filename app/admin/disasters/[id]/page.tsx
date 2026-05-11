@@ -14,7 +14,9 @@ import {
     Building2,
 } from "lucide-react";
 import Link from "next/link";
-import { generateMockDisasters, generateMockAdminTasks, generateMockTimelineEvents, formatTimeAgo, getStatusColor, getPriorityColor } from "../../_lib/adminMockData";
+import { fetchDisasterById, fetchTasksByEvent } from "../../_lib/adminService";
+import { generateMockTimelineEvents } from "../../_lib/adminMockData";
+import { formatTimeAgo, getStatusColor, getPriorityColor } from "../../_lib/adminUtils";
 import type { DisasterEvent, AdminTask, TimelineEvent } from "../../_lib/adminTypes";
 
 // ============================================
@@ -30,13 +32,22 @@ export default function DisasterDetailsPage({ params }: { params: Promise<{ id: 
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Mock loading
-        const mockDisaster = generateMockDisasters(1)[0];
-        mockDisaster.id = resolvedParams.id;
-        setDisaster(mockDisaster);
-        setTasks(generateMockAdminTasks(12, resolvedParams.id));
-        setTimeline(generateMockTimelineEvents(resolvedParams.id));
-        setIsLoading(false);
+        const load = async () => {
+            try {
+                const [dData, tData] = await Promise.all([
+                    fetchDisasterById(resolvedParams.id),
+                    fetchTasksByEvent(resolvedParams.id),
+                ]);
+                setDisaster(dData);
+                setTasks(tData);
+                setTimeline(generateMockTimelineEvents(resolvedParams.id));
+            } catch (e) {
+                console.error("Failed to load disaster details", e);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        load();
     }, [resolvedParams.id]);
 
     if (isLoading || !disaster) {

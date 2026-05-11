@@ -33,13 +33,22 @@ export default function QuakeLayer({
     useEffect(() => {
         if (!map || !earthquakeData) return;
 
+        const validQuakes = earthquakeData.features.filter(
+            (quake) => 
+                quake?.geometry?.coordinates?.length >= 2 &&
+                typeof quake.geometry.coordinates[0] === 'number' &&
+                typeof quake.geometry.coordinates[1] === 'number' &&
+                !isNaN(quake.geometry.coordinates[0]) &&
+                !isNaN(quake.geometry.coordinates[1])
+        );
+
         // Create source for heatmap if it doesn't exist
         if (!map.getSource(heatmapSourceId)) {
             map.addSource(heatmapSourceId, {
                 type: 'geojson',
                 data: {
                     type: 'FeatureCollection',
-                    features: earthquakeData.features.map((quake) => ({
+                    features: validQuakes.map((quake) => ({
                         type: 'Feature',
                         geometry: {
                             type: 'Point',
@@ -55,7 +64,7 @@ export default function QuakeLayer({
             // Update existing source
             (map.getSource(heatmapSourceId) as mapboxgl.GeoJSONSource).setData({
                 type: 'FeatureCollection',
-                features: earthquakeData.features.map((quake) => ({
+                features: validQuakes.map((quake) => ({
                     type: 'Feature',
                     geometry: {
                         type: 'Point',
@@ -158,8 +167,17 @@ export default function QuakeLayer({
 
         if (!visible) return;
 
+        const validQuakes = earthquakeData.features.filter(
+            (quake) => 
+                quake?.geometry?.coordinates?.length >= 2 &&
+                typeof quake.geometry.coordinates[0] === 'number' &&
+                typeof quake.geometry.coordinates[1] === 'number' &&
+                !isNaN(quake.geometry.coordinates[0]) &&
+                !isNaN(quake.geometry.coordinates[1])
+        );
+
         // Add markers for each earthquake
-        earthquakeData.features.forEach((quake) => {
+        validQuakes.forEach((quake) => {
             const { mag: rawMag, place, time } = quake.properties;
             const mag = rawMag ?? 0; // Default to 0 if magnitude is null/undefined
             const depth = quake.geometry.coordinates[2];

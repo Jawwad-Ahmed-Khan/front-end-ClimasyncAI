@@ -131,14 +131,15 @@ export function getStatusColor(status: TaskStatus): { bg: string; text: string; 
  * Returns TailwindCSS color classes for severity level.
  * Used in: Disaster markers, alert badges
  */
-export function getSeverityColor(severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'): { bg: string; text: string; marker: string } {
+export function getSeverityColor(severity: string | null | undefined): { bg: string; text: string; marker: string } {
+    const normalized = severity ? severity.toUpperCase().trim() : 'LOW';
     const colors: Record<string, { bg: string; text: string; marker: string }> = {
         LOW: { bg: 'bg-slate-500/20', text: 'text-slate-300', marker: '#64748b' },
         MEDIUM: { bg: 'bg-amber-500/20', text: 'text-amber-300', marker: '#f59e0b' },
         HIGH: { bg: 'bg-orange-500/20', text: 'text-orange-300', marker: '#f97316' },
         CRITICAL: { bg: 'bg-red-500/20', text: 'text-red-300', marker: '#ef4444' },
     };
-    return colors[severity];
+    return colors[normalized] || colors['LOW'];
 }
 
 /**

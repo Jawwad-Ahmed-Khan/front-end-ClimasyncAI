@@ -18,7 +18,8 @@ import {
     Linkedin,
     Plus,
 } from "lucide-react";
-import { generateMockSocialPosts, formatTimeAgo } from "../_lib/adminMockData";
+import { fetchSocialPosts, deleteSocialPost } from "../_lib/adminService";
+import { formatTimeAgo } from "../_lib/adminUtils";
 import type { SocialPost, SocialPlatform, SocialPostStatus } from "../_lib/adminTypes";
 
 // ============================================
@@ -53,8 +54,17 @@ export default function SocialPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        setPosts(generateMockSocialPosts(12));
-        setIsLoading(false);
+        const load = async () => {
+            try {
+                const data = await fetchSocialPosts();
+                setPosts(data);
+            } catch (e) {
+                console.error("Failed to load social posts", e);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        load();
     }, []);
 
     const filtered = activeTab === 'ALL' ? posts : posts.filter(p => p.status === activeTab);

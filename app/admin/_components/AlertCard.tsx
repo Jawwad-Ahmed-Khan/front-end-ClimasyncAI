@@ -14,7 +14,7 @@ import {
     ChevronRight,
 } from "lucide-react";
 import { Alert, DisasterType, AlertStatus } from "../_lib/adminTypes";
-import { formatTimeAgo, getStatusColor } from "../_lib/adminMockData";
+import { formatTimeAgo, getStatusColor } from "../_lib/adminUtils";
 
 // ============================================
 // ALERT CARD COMPONENT

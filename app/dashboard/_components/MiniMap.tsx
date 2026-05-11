@@ -20,7 +20,7 @@ interface MiniMapProps {
 }
 
 // Mapbox access token (use env variable in production)
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "pk.eyJ1IjoiY2xpbWFzeW5jYWkiLCJhIjoiY200dnpxd3NjMGUzdjJqcHNqc3p0Z3BrayJ9.H2jFynpBdC6Uj8E5DTqKWQ";
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
 export default function MiniMap({
     disasters,
@@ -65,7 +65,16 @@ export default function MiniMap({
         markers.current = [];
 
         // Add new markers
-        disasters.forEach((disaster) => {
+        const validDisasters = disasters.filter(
+            (d) => 
+                d?.location && 
+                typeof d.location.lng === 'number' && 
+                typeof d.location.lat === 'number' && 
+                !isNaN(d.location.lng) && 
+                !isNaN(d.location.lat)
+        );
+
+        validDisasters.forEach((disaster) => {
             const colors = getSeverityColor(disaster.severity);
 
             // Create marker element
@@ -107,7 +116,7 @@ export default function MiniMap({
             </span>
           </div>
           <div style="font-size: 12px; color: #94a3b8;">
-            Affected: ${disaster.affectedPopulation.toLocaleString()} people
+            Affected: ${(disaster.affectedPopulation || 0).toLocaleString()} people
           </div>
         </div>
       `);
