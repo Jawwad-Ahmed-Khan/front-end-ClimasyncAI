@@ -19,7 +19,7 @@ test.describe('02 — Dashboard Home', () => {
     await expect(page.getByText('Active Tasks')).toBeVisible();
     await expect(page.getByText('Pending Requests')).toBeVisible();
     await expect(page.getByText(/Completed/i).first()).toBeVisible();
-    await expect(page.getByText('Response Rate')).toBeVisible();
+    await expect(page.getByText('Response Rate').first()).toBeVisible();
   });
 
   test('Recent Tasks section renders', async ({ page }) => {

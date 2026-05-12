@@ -12,21 +12,21 @@ import type { SocialProviderConfig } from "./authTypes";
 // ---------------------------------------------------------------------------
 
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api/v1/";
 
 export const AUTH_ENDPOINTS = {
-  LOGIN: "/auth/login",
-  REGISTER: "/auth/register",
-  VERIFY_OTP: "/auth/verify-otp",
-  RESEND_OTP: "/auth/resend-otp",
+  LOGIN: "auth/login",
+  REGISTER: "auth/register",
+  VERIFY_OTP: "auth/verify-otp",
+  RESEND_OTP: "auth/resend-otp",
   // Future endpoints (placeholders)
-  REFRESH_TOKEN: "/auth/refresh-token",
-  LOGOUT: "/auth/logout",
-  ME: "/auth/me",
-  SOCIAL_LOGIN: (provider: string) => `/auth/social/${provider}`,
-  SOCIAL_CALLBACK: (provider: string) => `/auth/social/${provider}/callback`,
-  FORGOT_PASSWORD: "/auth/forgot-password",
-  RESET_PASSWORD: "/auth/reset-password",
+  REFRESH_TOKEN: "auth/refresh-token",
+  LOGOUT: "auth/logout",
+  ME: "auth/me",
+  SOCIAL_LOGIN: (provider: string) => `auth/social/${provider}`,
+  SOCIAL_CALLBACK: (provider: string) => `auth/social/${provider}/callback`,
+  FORGOT_PASSWORD: "auth/forgot-password",
+  RESET_PASSWORD: "auth/reset-password",
 } as const;
 
 // ---------------------------------------------------------------------------

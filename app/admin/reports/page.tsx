@@ -88,8 +88,8 @@ export default function ReportsPage() {
                         Disasters by Type
                     </h3>
                     <div className="space-y-3">
-                        {data.disastersByType.map((item) => (
-                            <div key={item.type} className="flex items-center gap-3">
+                        {data.disastersByType.map((item, index) => (
+                            <div key={item.type || index} className="flex items-center gap-3">
                                 <span className="w-24 text-xs text-slate-400">{item.type}</span>
                                 <div className="flex-1 h-6 bg-slate-800 rounded-lg overflow-hidden">
                                     <motion.div
@@ -113,10 +113,10 @@ export default function ReportsPage() {
                     </h3>
                     <div className="h-40 flex items-end gap-2">
                         {data.tasksOverTime.slice(-8).map((item, index) => {
-                            const maxVal = Math.max(...data.tasksOverTime.map(t => t.completed));
+                            const maxVal = Math.max(...data.tasksOverTime.map(t => t.completed), 1);
                             const height = (item.completed / maxVal) * 100;
                             return (
-                                <div key={item.date} className="flex-1 flex flex-col items-center gap-1">
+                                <div key={item.date || index} className="flex-1 flex flex-col items-center gap-1">
                                     <motion.div
                                         initial={{ height: 0 }}
                                         animate={{ height: `${height}%` }}
@@ -150,7 +150,7 @@ export default function ReportsPage() {
                         <tbody>
                             {data.ngoLeaderboard.slice(0, 10).map((ngo, index) => (
                                 <motion.tr
-                                    key={ngo.ngoId}
+                                    key={ngo.ngoId || index}
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: index * 0.05 }}

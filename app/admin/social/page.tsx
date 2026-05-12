@@ -16,6 +16,7 @@ import {
     Twitter,
     Facebook,
     Linkedin,
+    Instagram,
     Plus,
 } from "lucide-react";
 import { fetchSocialPosts, deleteSocialPost } from "../_lib/adminService";
@@ -38,6 +39,7 @@ const platformIcons: Record<SocialPlatform, React.ElementType> = {
     TWITTER: Twitter,
     FACEBOOK: Facebook,
     LINKEDIN: Linkedin,
+    INSTAGRAM: Instagram,
     TIKTOK: Share2,
 };
 
@@ -119,7 +121,7 @@ export default function SocialPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filtered.map((post, index) => (
                     <motion.div
-                        key={post.id}
+                        key={post.id || index}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
@@ -131,10 +133,11 @@ export default function SocialPage() {
                                 {post.status}
                             </span>
                             <div className="flex gap-1">
-                                {post.platforms.map(platform => {
+                                {(post.platforms || []).map((platform, pIdx) => {
                                     const Icon = platformIcons[platform];
+                                    if (!Icon) return null;
                                     return (
-                                        <div key={platform} className="w-6 h-6 rounded bg-slate-800 flex items-center justify-center">
+                                        <div key={`${post.id}-${platform}-${pIdx}`} className="w-6 h-6 rounded bg-slate-800 flex items-center justify-center">
                                             <Icon className="w-3.5 h-3.5 text-slate-400" />
                                         </div>
                                     );

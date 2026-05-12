@@ -46,11 +46,10 @@ test.describe('01 — Authentication', () => {
     await expect(page.getByText('Welcome back').first()).toBeVisible();
     await expect(page.getByText(uniqueOrg).first()).toBeVisible();
   });
-
   test('Login with existing credentials', async ({ page }) => {
     // Note: Uses the account registered above — works because same test run & DB persists
     await page.goto('/login');
-    await expect(page.getByRole('heading', { name: /Sign In|Login/i }).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Welcome back/i }).first()).toBeVisible();
 
     await page.getByLabel('Email Address', { exact: true }).fill(uniqueEmail);
     await page.getByLabel('Password', { exact: true }).fill(TEST_PASS);

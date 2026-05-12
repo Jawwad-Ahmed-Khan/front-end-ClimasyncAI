@@ -143,9 +143,24 @@ export async function fetchEarthquakes(): Promise<Earthquake[]> {
         setCachedData('earthquakes', allEarthquakes);
 
         return allEarthquakes;
-    } catch (error) {
+    } catch (error: any) {
+        // Gracefully handle auth errors (401) and network issues
+        // Return empty array so the map still renders without disaster markers
+        const status = error?.response?.status;
+        if (status === 401 || status === 403) {
+            console.warn('⚠️ Not authenticated — disaster data unavailable. Please log in.');
+            return [];
+        }
+        if (error?.code === 'ECONNABORTED' || error?.message?.includes('timeout')) {
+            console.warn('⚠️ Disaster data request timed out — returning empty results.');
+            return [];
+        }
+        if (error?.message === 'Network Error') {
+            console.warn('⚠️ Network error fetching disaster data — backend may be unreachable.');
+            return [];
+        }
         console.error('❌ Error fetching disaster data:', error);
-        throw new Error('An unexpected error occurred while fetching disaster data');
+        return [];
     }
 }
 
@@ -191,7 +206,7 @@ export async function fetchRainData(): Promise<WeatherGridData> {
                     current: ['rain', 'precipitation', 'weather_code'].join(','),
                     timezone: 'auto',
                 },
-                timeout: 8000,
+                timeout: 15000,
             });
         });
 
@@ -214,7 +229,7 @@ export async function fetchRainData(): Promise<WeatherGridData> {
                     });
                 });
             } else {
-                console.error('❌ Failed to fetch a weather chunk:', result.reason);
+                console.warn('⚠️ Failed to fetch a weather chunk:', result.reason?.message || 'Unknown error');
             }
         });
 
@@ -229,9 +244,12 @@ export async function fetchRainData(): Promise<WeatherGridData> {
         setCachedData('rainData', weatherGrid);
 
         return weatherGrid;
-    } catch (error) {
-        console.error('❌ Error fetching rain data:', error);
-        throw new Error('Failed to fetch rain data');
+    } catch (error: any) {
+        console.warn('⚠️ Error fetching rain data:', error?.message || error);
+        return {
+            points: [],
+            lastUpdated: Date.now(),
+        };
     }
 }
 

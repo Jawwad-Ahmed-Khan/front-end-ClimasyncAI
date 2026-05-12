@@ -6,15 +6,15 @@
       "localStorage": [
         {
           "name": "climasync_refresh_token",
-          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MjdlYmMzZS02NTUyLTRmMmEtYWNhOC1kY2VjZTAxYTNhNjMiLCJleHAiOjE3NzY0NzI0ODMsImlhdCI6MTc3NTg2NzY4MywidHlwZSI6InJlZnJlc2gifQ.H4LL4m8QuDH_9Oqts0CaWxPeQHkyVVRb9fUI68RGlgg"
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MzQzOGYyOC1lZjMwLTQwOGYtYTgxMS1mMDA0ZmI5M2I5OTgiLCJleHAiOjE3NzkxMzc5NjMsImlhdCI6MTc3ODUzMzE2MywidHlwZSI6InJlZnJlc2gifQ.JTPEd7vv5Np5ONteZlnmf-gdB1qrdpeztUEQVI96k8Y"
         },
         {
           "name": "climasync_user",
-          "value": "{\"user_id\":\"827ebc3e-6552-4f2a-aca8-dcece01a3a63\",\"email\":\"setup_1775867670623@example.com\",\"role\":\"ngo_user\",\"org_name\":\"SetupNGO_1775867670623\",\"is_active\":true,\"email_verified\":true,\"verification_status\":\"pending\"}"
+          "value": "{\"user_id\":\"83438f28-ef30-408f-a811-f004fb93b998\",\"email\":\"setup_1778533155787@example.com\",\"role\":\"ngo_user\",\"org_name\":\"SetupNGO_1778533155787\",\"is_active\":true,\"email_verified\":true,\"verification_status\":\"pending\"}"
         },
         {
           "name": "climasync_access_token",
-          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MjdlYmMzZS02NTUyLTRmMmEtYWNhOC1kY2VjZTAxYTNhNjMiLCJleHAiOjE3NzU4Njk0ODMsImlhdCI6MTc3NTg2NzY4MywidHlwZSI6ImFjY2VzcyIsInJvbGUiOiJuZ29fdXNlciJ9.1kyxF2jEkJ59u2t4u5hXOu9leUmzersp9KXxy9AOdck"
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MzQzOGYyOC1lZjMwLTQwOGYtYTgxMS1mMDA0ZmI5M2I5OTgiLCJleHAiOjE3Nzg1MzQ5NjMsImlhdCI6MTc3ODUzMzE2MywidHlwZSI6ImFjY2VzcyIsInJvbGUiOiJuZ29fdXNlciJ9.cjT5H5MxinQMxUR1DDMshCUo6j4meglYbLwDBDfMPQ0"
         }
       ]
     }

@@ -106,9 +106,8 @@ export default function AlertCard({ alert, onVerify, index = 0 }: AlertCardProps
                 {/* Source Badge */}
                 <span className={`
                     px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide
-                    rounded border ${sourceColors[alert.source]}
                 `}>
-                    {alert.source.replace('_', ' ')}
+                    {alert.source ? alert.source.replace('_', ' ') : 'UNKNOWN'}
                 </span>
 
                 {/* Status Badge */}

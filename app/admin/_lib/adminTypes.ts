@@ -79,7 +79,7 @@ export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 /**
  * Social media platforms
  */
-export type SocialPlatform = 'TWITTER' | 'FACEBOOK' | 'LINKEDIN' | 'TIKTOK';
+export type SocialPlatform = 'TWITTER' | 'FACEBOOK' | 'LINKEDIN' | 'TIKTOK' | 'INSTAGRAM';
 
 /**
  * Social post status flow
