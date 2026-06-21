@@ -53,6 +53,44 @@ export async function fetchDashboardStats(): Promise<AdminStats> {
 }
 
 // ============================================
+// ADMIN - RISK ANALYSIS
+// ============================================
+
+export async function triggerRiskAnalysis(alert: Alert) {
+    try {
+        const payload = {
+            breach_id: alert.id,
+            disaster_kind: alert.type === 'EARTHQUAKE' ? 'earthquake' : 'flood',
+            location_name: alert.locationName || "Unknown Location",
+            district: alert.rawData?.district || "Unknown District",
+            province: alert.rawData?.province || alert.province || "khyber_pakhtunkhwa",
+            latitude: alert.location.lat !== 0 ? alert.location.lat : 35.48,
+            longitude: alert.location.lng !== 0 ? alert.location.lng : 72.58,
+            observed_value: alert.severity || 4.5,
+            threshold_value: 4.0,
+            breach_severity: alert.severity > 7 ? "critical" : "warning",
+            metric_name: "water_level_meters",
+            observation_time: alert.detectedAt.toISOString(),
+            source_api: "usgs",
+            is_forecast_breach: false,
+            forecast_horizon_h: null,
+            gauge_id: null,
+            usgs_event_id: null,
+            weather_location_id: null
+        };
+
+        const { data } = await apiClient.post("risk-analysis/assess", payload);
+        return data;
+    } catch (error: any) {
+        if (error.response && error.response.status === 422) {
+            console.error("API Validation Error (422) - Payload sent:", payload);
+            console.error("API Validation Error (422) - Details:", JSON.stringify(error.response.data, null, 2));
+        }
+        throw error;
+    }
+}
+
+// ============================================
 // ADMIN - REPORTS
 // ============================================
 

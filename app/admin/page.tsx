@@ -18,9 +18,12 @@ import Link from "next/link";
 import AlertCard from "./_components/AlertCard";
 import StatCard from "./_components/StatCard";
 import LiveMap from "./_components/LiveMap";
+import RiskAssessmentModal from "./_components/RiskAssessmentModal";
 import { fetchNGOs } from "./_lib/adminService";
 import { getAdminGlobalReport } from "@/app/_lib/admin/adminService";
 import { getLiveAlerts, getActiveDisasters } from "@/app/_lib/disasters/disasterService";
+import { useAlertWebsocket } from "@/app/_hooks/useAlertWebsocket";
+import { triggerRiskAnalysis } from "./_lib/adminService";
 import type { AdminReportResponse } from "@/app/_lib/admin/adminTypes";
 import type { Alert, DisasterEvent, NGOWithPerformance, AlertSource, AlertStatus, RiskLevel } from "./_lib/adminTypes";
 
@@ -37,6 +40,18 @@ export default function CommandCenterPage() {
     const [onlineNGOs, setOnlineNGOs] = useState<NGOWithPerformance[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [lastRefresh, setLastRefresh] = useState(new Date());
+
+    // Modal State
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentReport, setCurrentReport] = useState<any>(null);
+    const [reports, setReports] = useState<Record<string, any>>({});
+
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 
+        (process.env.NEXT_PUBLIC_API_BASE_URL 
+            ? process.env.NEXT_PUBLIC_API_BASE_URL.replace('http', 'ws').replace('/api/v1', '') 
+            : 'ws://localhost:8000');
+            
+    const { realtimeAlerts, isConnected } = useAlertWebsocket(wsUrl);
 
     // Load mock data
     useEffect(() => {
@@ -107,9 +122,23 @@ export default function CommandCenterPage() {
     }, []);
 
     // Handle verify action
-    const handleVerify = (alertId: string) => {
-        console.log('Verify alert:', alertId);
-        // TODO: Open Pipeline Modal
+    const handleVerify = async (alert: Alert) => {
+        try {
+            console.log('Initiating risk analysis for:', alert.id);
+            const report = await triggerRiskAnalysis(alert);
+            setReports(prev => ({ ...prev, [alert.id]: report }));
+            setCurrentReport(report);
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error("Failed to trigger risk analysis:", error);
+            // Optionally, show a toast notification here
+            window.alert("Failed to analyze risk. Check console for details.");
+        }
+    };
+
+    const handleViewAnalysis = (alert: Alert) => {
+        setCurrentReport(reports[alert.id]);
+        setIsModalOpen(true);
     };
 
     // Refresh data
@@ -127,6 +156,9 @@ export default function CommandCenterPage() {
             window.location.reload(); // Simple refresh for now
         }, 500);
     };
+
+    // Combine static/mock alerts with realtime alerts, giving realtime priority
+    const combinedAlerts = [...realtimeAlerts, ...alerts];
 
     if (isLoading || !stats) {
         return (
@@ -217,7 +249,7 @@ export default function CommandCenterPage() {
                             <div>
                                 <h2 className="text-lg font-semibold text-white">Real-time Alerts</h2>
                                 <p className="text-xs text-slate-400">
-                                    {alerts.filter(a => a.status === 'NEW').length} new alerts awaiting review
+                                    {combinedAlerts.filter(a => a.status === 'NEW').length} new alerts awaiting review
                                 </p>
                             </div>
                         </div>
@@ -240,11 +272,13 @@ export default function CommandCenterPage() {
 
                     {/* Alert Cards Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {alerts.slice(0, 6).map((alert, index) => (
+                        {combinedAlerts.slice(0, 6).map((alert, index) => (
                             <AlertCard
                                 key={alert.id}
                                 alert={alert}
                                 onVerify={handleVerify}
+                                onViewAnalysis={handleViewAnalysis}
+                                hasReport={!!reports[alert.id]}
                                 index={index}
                             />
                         ))}
@@ -255,7 +289,7 @@ export default function CommandCenterPage() {
                 <div className="space-y-6">
                     {/* Live Map */}
                     <LiveMap
-                        alerts={alerts}
+                        alerts={combinedAlerts}
                         disasters={disasters}
                         className="h-[350px]"
                     />
@@ -292,13 +326,13 @@ export default function CommandCenterPage() {
                                     <div className="flex items-center gap-3">
                                         <div className="relative">
                                             <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white text-xs font-bold">
-                                                {ngo.orgName.charAt(0)}
+                                                {(ngo.orgName || 'N').charAt(0)}
                                             </div>
                                             <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-900" />
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium text-white truncate max-w-[140px]">
-                                                {ngo.orgName}
+                                                {ngo.orgName || 'Unknown NGO'}
                                             </p>
                                             <p className="text-[10px] text-slate-500">
                                                 {ngo.tasksInProgress} active task{ngo.tasksInProgress !== 1 ? 's' : ''}
@@ -320,7 +354,7 @@ export default function CommandCenterPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <QuickActionCard
                     title="Review Incidents"
-                    count={alerts.filter(a => a.status === 'NEW').length}
+                    count={combinedAlerts.filter(a => a.status === 'NEW').length}
                     href="/admin/incidents"
                     color="red"
                     index={0}
@@ -346,6 +380,13 @@ export default function CommandCenterPage() {
                     index={3}
                 />
             </div>
+
+            {/* Risk Assessment Modal */}
+            <RiskAssessmentModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                report={currentReport} 
+            />
         </div>
     );
 }
