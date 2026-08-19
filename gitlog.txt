@@ -1,0 +1,43 @@
+﻿* e5bd022 fixed size issue of map
+* c86abb8 Map Issues
+* 7cbb41e solve issues of Home Page
+*   a095c8b Merge pull request #10 from Jawwad-Ahmed-Khan/navbar-footer
+|\  
+| * 966883b Dashboard
+| * 143e242 solve error
+| * 307f27f Add Navbar and Footer
+|/  
+*   2484880 Merge pull request #9 from Jawwad-Ahmed-Khan/feature-map
+|\  
+| * 527978b Add minimal Map page work well for earthquake but make more real for rain
+* |   db1fbf4 Merge pull request #8 from Jawwad-Ahmed-Khan/features-task
+|\ \  
+| |/  
+|/|   
+| * aacdf97 Task page
+|/  
+*   dfa9f12 Merge pull request #7 from Jawwad-Ahmed-Khan/feature-about-page
+|\  
+| * ced5370 Add minimum Design of About Page in repo
+|/  
+*   435cc79 Merge pull request #6 from Jawwad-Ahmed-Khan/feature-News-Page
+|\  
+| * d5ad353 Design a Minimum design
+|/  
+*   cd695cb Merge pull request #5 from Jawwad-Ahmed-Khan/feature-test-joinus
+|\  
+| * f69dfed Add Why this Project, Testinomials, and join us  sections on home page
+|/  
+*   d180249 Merge pull request #4 from Jawwad-Ahmed-Khan/feature-key-milestone
+|\  
+| * c28bd6b Add Workflow
+* | 8ee5aaa Merge pull request #3 from Jawwad-Ahmed-Khan/feature-key-milestone
+|\| 
+| * 2bd44ee Add Key milestone section on a home screen
+|/  
+*   06717a6 Merge pull request #2 from Jawwad-Ahmed-Khan/jawwad-image-slider
+|\  
+| * 85fd961 Add Linear gradient in Hero Section
+| * 47ad7f9 Add Image Slider on Home Page using Embala Carsoule
+|/  
+* 2f735c2 Initial commit from Create Next App

@@ -1,0 +1,22 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:3000",
+      "localStorage": [
+        {
+          "name": "climasync_refresh_token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MzQzOGYyOC1lZjMwLTQwOGYtYTgxMS1mMDA0ZmI5M2I5OTgiLCJleHAiOjE3NzkxMzc5NjMsImlhdCI6MTc3ODUzMzE2MywidHlwZSI6InJlZnJlc2gifQ.JTPEd7vv5Np5ONteZlnmf-gdB1qrdpeztUEQVI96k8Y"
+        },
+        {
+          "name": "climasync_user",
+          "value": "{\"user_id\":\"83438f28-ef30-408f-a811-f004fb93b998\",\"email\":\"setup_1778533155787@example.com\",\"role\":\"ngo_user\",\"org_name\":\"SetupNGO_1778533155787\",\"is_active\":true,\"email_verified\":true,\"verification_status\":\"pending\"}"
+        },
+        {
+          "name": "climasync_access_token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MzQzOGYyOC1lZjMwLTQwOGYtYTgxMS1mMDA0ZmI5M2I5OTgiLCJleHAiOjE3Nzg1MzQ5NjMsImlhdCI6MTc3ODUzMzE2MywidHlwZSI6ImFjY2VzcyIsInJvbGUiOiJuZ29fdXNlciJ9.cjT5H5MxinQMxUR1DDMshCUo6j4meglYbLwDBDfMPQ0"
+        }
+      ]
+    }
+  ]
+}

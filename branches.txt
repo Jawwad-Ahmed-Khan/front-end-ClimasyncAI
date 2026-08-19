@@ -1,0 +1,12 @@
+﻿* master
+  remotes/origin/HEAD -> origin/master
+  remotes/origin/feature-News-Page
+  remotes/origin/feature-about-page
+  remotes/origin/feature-key-milestone
+  remotes/origin/feature-map
+  remotes/origin/feature-test-joinus
+  remotes/origin/features
+  remotes/origin/features-task
+  remotes/origin/jawwad-image-slider
+  remotes/origin/master
+  remotes/origin/navbar-footer
